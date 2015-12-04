@@ -3,7 +3,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "annamdra";
+$password = "";
 $database = "alano";
 
 $userid = $_POST['username'];
