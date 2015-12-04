@@ -7,7 +7,7 @@ $password = "";
 $database = "alano";
 
 $userid = $_POST['username'];
-$password = $_POST['password'];
+$passid = $_POST['password'];
 
 $connection = new mysqli($servername, $username, $password, $database);
 
@@ -20,7 +20,7 @@ else
 {
 	mysqli_query($connection, "SET NAMES utf8");	
 		
-	$query = "SELECT TenDN, MatKhau FROM TaiKhoan";
+	$query = "SELECT TenDN, MatKhau FROM TaiKhoan WHERE TenDN = '$userid' AND MatKhau = '$passid'";
 	
 	$result = mysqli_query($connection, $query);
 	
@@ -28,6 +28,10 @@ else
 	if (mysqli_num_rows($result) > 0)
 	{
 		echo "LOGIN SUCCESS";
+	}
+	else
+	{
+		echo "LOGIN FAIL";
 	}
 	
 	// Free result set
