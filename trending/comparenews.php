@@ -37,6 +37,8 @@ function compare(array $TinTuc1, array $TinTuc2)
 	
 	if ($avg >= 0.75)
 		return true;
+	else
+		return false;
 }
 
 $servername = "localhost";
