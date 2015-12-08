@@ -1,9 +1,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 <?php
+
+//Hàm so sánh 2 tin tức
 function compare(array $TinTuc1, array $TinTuc2)
 {
-	//Compare TieuDe
+	//So sánh tiêu đề 2 bài viết (Đếm số từ giống nhau)
 	$tieude1 = explode(" ", $TinTuc1["TieuDe"]);
 	$tieude2 = explode(" ", $TinTuc2["TieuDe"]);
 	
@@ -13,7 +15,7 @@ function compare(array $TinTuc1, array $TinTuc2)
 			if ($tieude1[$i] == $tieude2[$j])
 				$count1++;
 	
-	//Compare TomTat
+	//So sánh phần tóm tắt
 	$tomtat1 = explode(" ", $TinTuc1["TomTat"]);
 	$tomtat2 = explode(" ", $TinTuc2["TomTat"]);
 	
@@ -23,7 +25,7 @@ function compare(array $TinTuc1, array $TinTuc2)
 			if ($tomtat1[$i] == $tomtat2[$j])
 				$count2++;
 			
-	//Compare Tag
+	//Đếm số tag giống nhau
 	$tag1 = explode(" ", $TinTuc1["Tag"]);
 	$tag2 = explode(" ", $TinTuc2["Tag"]);
 	
@@ -34,11 +36,10 @@ function compare(array $TinTuc1, array $TinTuc2)
 				$count3++;
 			
 	$avg = 0.4*$count1/count($tieude1) + 0.25*$count2/count($tomtat1) + 0.35*$count3/count($tag1);
+	//$avg = $count1/count($tieude1);
 	
 	if ($avg >= 0.75)
 		return true;
-	else
-		return false;
 }
 
 $servername = "localhost";
@@ -46,10 +47,10 @@ $username = "root";
 $password = "";
 $database = "alano";
 
-// Create connectionection
+// Tạo kết nối đến CSDL
 $connection = new mysqli($servername, $username, $password, $database);
 
-// Check connectionection
+// Kiểm tra kết nối
 if ($connection->connect_error) {
     die("connectionection failed: " . $connection->connect_error);
 }
@@ -57,8 +58,8 @@ else
 {
 	mysqli_query($connection,"SET NAMES utf8"); 
 
-	//Read from MySql Database
-	$sql = "SELECT MaTinTuc, TieuDe, TomTat, NoidungChinh, NgayDang, DuongLinkGoc, TinhTrangLink, CacTrangDanNguon, SoLuotShare, SoLuotComment, BaiTuongTu, SoBaiTrung, Tag FROM TinTuc";
+	//Đọc dữ liệu từ bảng Tin Tức
+	$sql = "SELECT MaTinTuc, TieuDe, TomTat, NoidungChinh, NgayDang, DuongLinkGoc, TinhTrangLink, CacTrangDanNguon, SoLuotShare, SoLuotComment, BaiTuongTu, SoBaiTrung, Tag, BaiGoc, DaDuyet FROM TinTuc";
 	$result = mysqli_query($connection,$sql);
 	
 	$TinTucInfo = array();
@@ -67,21 +68,57 @@ else
 		$TinTucInfo[] = $row_TinTuc;
 
 	
-	//Compare TieuDe. If 2 TinTuc have the same TieuDe then increase SoBaiTrung of both 2 TinTuc
-	for ($i = 0; $i < count($TinTucInfo) - 1; $i++)
-		for ($j = $i + 1; $j < count($TinTucInfo); $j++)
+	//So sánh 2 tin tức
+	for ($i = 0; $i < count($TinTucInfo); $i++)
+	{
+		if ($TinTucInfo[$i]["DaDuyet"] == 0)	//Chỉ so sánh những tin chưa duyệt
 		{
-			if (compare($TinTucInfo[$i],$TinTucInfo[$j]))
+			for ($j = $i + 1; $j < count($TinTucInfo); $j++)
 			{
-				$TinTucInfo[$i]["SoBaiTrung"] += 1;
-				$TinTucInfo[$j]["SoBaiTrung"] += 1;
+				//Nếu 2 tin được cho là có nội dung giống nhau
+				if (compare($TinTucInfo[$i],$TinTucInfo[$j]))
+				{					
+					//Tăng số bài trùng của mỗi tin lên 1
+					$TinTucInfo[$i]["SoBaiTrung"] += 1;
+					$TinTucInfo[$j]["SoBaiTrung"] += 1;
+				
+					//Gán bài gốc cho bài đăng sớm hơn
+					$d1 = date_parse_from_format('Y-m-d H:i:s',$TinTucInfo[$i]["NgayDang"]);
+					$d2 = date_parse_from_format('Y-m-d H:i:s',$TinTucInfo[$j]["NgayDang"]);
+					
+					if ($TinTucInfo[$i]["BaiTuongTu"] == null && $TinTucInfo[$j]["BaiTuongTu"] == null)
+					{
+						if ($d1 < $d2)
+							$TinTucInfo[$i]["BaiGoc"] = 1;
+						else
+							$TinTucInfo[$j]["BaiGoc"] = 1;
+					}
+					else
+					{
+						if ($d1 < $d2 && $TinTucInfo[$i]["BaiGoc"] == 0)
+						{
+							$temp = $TinTucInfo[$i]["BaiGoc"];
+							$TinTucInfo[$i]["BaiGoc"] = $TinTucInfo[$j]["BaiGoc"];
+							$TinTucInfo[$j]["BaiGoc"] = $temp;
+						}
+						
+					}
+					
+					//Đưa vào danh sách các bài tương tự
+					$TinTucInfo[$i]["BaiTuongTu"] = $TinTucInfo[$i]["BaiTuongTu"] . $TinTucInfo[$j]["MaTinTuc"] . " ";
+					$TinTucInfo[$j]["BaiTuongTu"] = $TinTucInfo[$j]["BaiTuongTu"] . $TinTucInfo[$i]["MaTinTuc"] . " ";
+				}
 			}
+			
+			//Đã duyệt
+			$TinTucInfo[$i]["DaDuyet"] = 1;
 		}
+	}
 	
-	//Update Database
+	//Cập nhật lại dữ liệu
 	foreach($TinTucInfo as $tintuc)
 	{
-		$sqlud = "update TinTuc set SoBaiTrung = " . $tintuc["SoBaiTrung"] . " where MaTinTuc = " . $tintuc["MaTinTuc"];
+		$sqlud = "update TinTuc set SoBaiTrung = " . $tintuc["SoBaiTrung"] . ", BaiTuongTu = '" . $tintuc["BaiTuongTu"] . "', BaiGoc = " . $tintuc["BaiGoc"] . ", DaDuyet = " . $tintuc["DaDuyet"] . " where MaTinTuc = " . $tintuc["MaTinTuc"];
 		$result = mysqli_query($connection,$sqlud);
 	}
 	
