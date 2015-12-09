@@ -149,7 +149,7 @@ else
 	{
 		$sqlud = "update TinTuc set SoBaiTrung = " . $tintuc["SoBaiTrung"] . ", BaiTuongTu = '" . $tintuc["BaiTuongTu"] . "', BaiGoc = " . $tintuc["BaiGoc"] . ", DaDuyet = " . $tintuc["DaDuyet"] . " where MaTinTuc = " . $tintuc["MaTinTuc"];
 		//$sqlud = "update TinTuc set SoBaiTrung = 0, BaiTuongTu = null, BaiGoc = 0, DaDuyet = 0 where MaTinTuc = " . $tintuc["MaTinTuc"];
-		echo $sqlud . "<br>";
+		//echo $sqlud . "<br>";
 		
 		$result = mysqli_query($connection,$sqlud);
 	}
