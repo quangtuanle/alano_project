@@ -1,42 +1,69 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 <?php
+//Tỉ lệ giống nhau giữa 2 đoạn text
+function sameRatio ($string1, $string2)
+{
+	$word1 = preg_split("/[ \n\t,.:']/", $string1, -1, PREG_SPLIT_NO_EMPTY);
+	$word2 = preg_split("/[ \n\t,.:']/", $string2, -1, PREG_SPLIT_NO_EMPTY);
+	
+	$count = 0;
+	for ($i = 0; $i < count($word1); $i++)
+		for ($j = 0; $j < count($word2); $j++)
+			if ($word1[$i] == $word2[$j])
+				$count++;
+	
+	return $count/count($word1);
+}
 
 //Hàm so sánh 2 tin tức
 function compare(array $TinTuc1, array $TinTuc2)
 {
 	//So sánh tiêu đề 2 bài viết (Đếm số từ giống nhau)
-	$tieude1 = explode(" ", $TinTuc1["TieuDe"]);
-	$tieude2 = explode(" ", $TinTuc2["TieuDe"]);
-	
-	$count1 = 0;
-	for ($i = 0; $i < count($tieude1); $i++)
-		for ($j = 0; $j < count($tieude2); $j++)
-			if ($tieude1[$i] == $tieude2[$j])
-				$count1++;
+	$tieude = sameRatio($TinTuc1["TieuDe"],$TinTuc2["TieuDe"]);
 	
 	//So sánh phần tóm tắt
-	$tomtat1 = explode(" ", $TinTuc1["TomTat"]);
-	$tomtat2 = explode(" ", $TinTuc2["TomTat"]);
+	$tomtat = 0;//sameRatio($TinTuc1["TomTat"],$TinTuc2["TomTat"]);
 	
-	$count2 = 0;
-	for ($i = 0; $i < count($tomtat1); $i++)
-		for ($j = 0; $j < count($tomtat2); $j++)
-			if ($tomtat1[$i] == $tomtat2[$j])
-				$count2++;
-			
 	//Đếm số tag giống nhau
-	$tag1 = explode(" ", $TinTuc1["Tag"]);
-	$tag2 = explode(" ", $TinTuc2["Tag"]);
+	$tag = sameRatio($TinTuc1["Tag"],$TinTuc2["Tag"]);
 	
-	$count3 = 0;
-	for ($i = 0; $i < count($tag1); $i++)
-		for ($j = 0; $j < count($tag2); $j++)
-			if ($tag1[$i] == $tag2[$j])
-				$count3++;
+	//So sánh nội dung chính, chỉ so sánh các danh từ riêng
+	for ($i = 0; $i < strlen($TinTuc1["NoidungChinh"]) - 2; $i++)
+		if ($TinTuc1["NoidungChinh"][$i] == "." || $TinTuc1["NoidungChinh"][$i] == ":")
+			if ($TinTuc1["NoidungChinh"][$i+2] >= 'A' && $TinTuc1["NoidungChinh"][$i+2] <= 'Z')
+				$TinTuc1["NoidungChinh"][$i+2] = strtolower($TinTuc1["NoidungChinh"][$i+2]);
+	
+	for ($i = 0; $i < strlen($TinTuc2["NoidungChinh"]) - 2; $i++)
+		if ($TinTuc2["NoidungChinh"][$i] == "." || $TinTuc2["NoidungChinh"][$i] == ":")
+			if ($TinTuc2["NoidungChinh"][$i+2] >= 'A' && $TinTuc2["NoidungChinh"][$i+2] <= 'Z')
+				$TinTuc2["NoidungChinh"][$i+2] = strtolower($TinTuc2["NoidungChinh"][$i+2]);
+	
+	$noidung1 = preg_split("/[ \n\t,.:']/", $TinTuc1["NoidungChinh"], -1, PREG_SPLIT_NO_EMPTY);
+	$noidung2 = preg_split("/[ \n\t,.:']/", $TinTuc2["NoidungChinh"], -1, PREG_SPLIT_NO_EMPTY);
+		
+	$countupper = 0;
+	$sameword = 0;
+	for ($i = 0; $i < count($noidung1); $i++)
+	{
+		if ($noidung1[$i] >= 'A' && $noidung1[$i] <= 'Z')
+		{
+			$countupper++;
 			
-	$avg = 0.4*$count1/count($tieude1) + 0.25*$count2/count($tomtat1) + 0.35*$count3/count($tag1);
-	//$avg = $count1/count($tieude1);
+			for ($j = 0; $j < count($noidung2); $j++)
+				if ($noidung1[$i] == $noidung2[$j])
+				{
+					$sameword++;
+					break;
+				}
+		}
+	}
+		
+	$noidung = $sameword/$countupper;
+	
+	$avg = 0.4*$tieude + 0.25*$noidung + 0.15*$tomtat + 0.2*$tag;
+	
+	//echo $tieude . " + " . $noidung . " + " . $tomtat . " + " . $tag . " = " . $avg . "<br>";
 	
 	if ($avg >= 0.75)
 		return true;
@@ -78,6 +105,8 @@ else
 				//Nếu 2 tin được cho là có nội dung giống nhau
 				if (compare($TinTucInfo[$i],$TinTucInfo[$j]))
 				{					
+					//echo ($i+1) . " = " . ($j+1) . "<br>";
+					
 					//Tăng số bài trùng của mỗi tin lên 1
 					$TinTucInfo[$i]["SoBaiTrung"] += 1;
 					$TinTucInfo[$j]["SoBaiTrung"] += 1;
@@ -119,6 +148,9 @@ else
 	foreach($TinTucInfo as $tintuc)
 	{
 		$sqlud = "update TinTuc set SoBaiTrung = " . $tintuc["SoBaiTrung"] . ", BaiTuongTu = '" . $tintuc["BaiTuongTu"] . "', BaiGoc = " . $tintuc["BaiGoc"] . ", DaDuyet = " . $tintuc["DaDuyet"] . " where MaTinTuc = " . $tintuc["MaTinTuc"];
+		//$sqlud = "update TinTuc set SoBaiTrung = 0, BaiTuongTu = null, BaiGoc = 0, DaDuyet = 0 where MaTinTuc = " . $tintuc["MaTinTuc"];
+		echo $sqlud . "<br>";
+		
 		$result = mysqli_query($connection,$sqlud);
 	}
 	
