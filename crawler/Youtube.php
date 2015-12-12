@@ -1,4 +1,5 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+
 <?php
 
 // It may take a whils to crawl a site ...
@@ -14,9 +15,19 @@ class MyCrawler extends PHPCrawler
 	
 	function handleDocumentInfo(PHPCrawlerDocumentInfo $p)
 	{ 
-		echo "$p->url.<br>";
-		//echo "The loai: Tin tuc<br>";	
-		echo "Ten cua bai viet:";
+		$depth = 3;
+		$servername = "localhost";
+		$username = "root";
+		$password = "";
+		$dbname = "alano";
+		$Link = $p->url;
+		$theloai =  "tin tuc";
+	//	echo "Ten cua bai viet:";
+		$Name = "";
+		$Like = "";
+		$TagTT ="";
+		$Description = "";
+		$date = null;
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
 		$anchors = $dom->getElementsByTagName('span');
@@ -25,13 +36,15 @@ class MyCrawler extends PHPCrawler
 					//echo "<br>asdaasd";
 					if($element->getAttribute("class") == "watch-title ")
 					{
-						echo $element->getAttribute("title");
-						echo "<br>";
+						$Name =  $element->getAttribute("title");
+						
 					}
 				}
-		
+		if($Name == "")
+			return;
 
-		echo "Ngày Đăng:";
+		// "Ngày Đăng:";
+		
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
 		$anchors2 = $dom->getElementsByTagName('strong');
@@ -39,32 +52,90 @@ class MyCrawler extends PHPCrawler
 				{					
 					if($element->getAttribute("class") == "watch-time-text")
 					{
+						$charDT = $element->nodeValue;
+						//echo $charDT;
+						//$charDT = rtrim($charDT,"GMT+7 ");
+						 //$n = strcspn($charDT,",");
+						// echo $n;
+						//echo substr('abcdef', 1, 3);  // bcd
+						//echo strlen($charDT);
+						$charDT = substr($charDT,19,14);
+						$charDT = str_replace("thg","",$charDT);
+						$charDT = str_replace("  ","-",$charDT);
+						$charDT = str_replace(" ","-",$charDT);
+						$charDT = str_replace(",","",$charDT);
+						// echo $charDT;
+						 $format = 'd-m-Y';
 						
-						echo $element->nodeValue;
-						//echo  $element->getAttribute('href');
-						//$s1 = CopyPartString($element->getAttribute('href'),"/","/");
-						echo "<br>";
+						 $date = DateTime::createFromFormat($format, $charDT);
+						// echo $date.Tostring();
+						//if($date == null)
+						//	echo "null";
+						 $charDT =  $date->format('Y-m-d H:i:s');
+						 
+						break;
 					}
 				}
-		
-		echo "<br>";
+		$n = 0;
+		$dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile($p->url);
+		$anchors = $dom->getElementsByTagName('span');
+				foreach ($anchors as $element) 
+				{
+					
+					$namesd = $element->nodeValue;
+					$namesd = rtrim($namesd," ");
+					if (is_numeric($namesd))
+					{
+						$n++;
+						if($n == 2 )
+						{
+							$namesd = str_replace(".","",$namesd);
+							$Like = $namesd ;
+							break;
+						}
+					}
+					
+				}	
+			
+	if($Name !="")
+	{
+		$conn = new mysqli($servername, $username, $password, $dbname);
 
-			
-			
-		//$myfile = fopen("testfile.txt", "w");
-		//fwrite($myfile, $p->source );
-			//echo $p->source;
-	//	echo "1: $p->header.<br>.$p->url.<br>";
-	//$arrayTitle = $p->meta_attributes;
-	//echo $arrayTitle[1];
-	
-	//	foreach ($arrayTitle as $tags)
-	//	{
-	//		echo "$tags.<br>";
-			
-	//	}
-	//	echo "=------------------------------------------------------s.<br>";
-	//fclose($myfile);
+// Check connection
+		if ($conn->connect_error) 
+		{
+		die("Connection failed: " . $conn->connect_error);
+		}
+		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$result = $conn->query($sql);
+		//echo "$Link";
+		//echo $result->num_rows;
+		if ($result->num_rows == 0) 
+		{
+    // output data of each row
+			//while($row = $result->fetch_assoc()) {
+			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
+			$Link = mysqli_real_escape_string($conn,$Link);
+			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang,SoLuotLike)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$Like')";
+			echo "<br>";
+			//echo $sql;
+			$conn->query("set names 'utf8'");  
+			if ($conn->query($sql) === TRUE) 
+			{
+				echo "New record created successfully";
+			}
+			else 
+			{
+				echo "error:" .$conn->error;
+			//	echo "Error: " . $sql . "<br>" . $conn->error;
+			}
+		}
+		
+		$conn->close();
+
+	}
 	}	
 
 	function handleHeaderInfo(PHPCrawlerResponseHeader $header)
@@ -89,7 +160,7 @@ class MyCrawler extends PHPCrawler
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("https://www.youtube.com/watch?v=BbPAR18CeB8");
+$crawler->setURL("https://www.youtube.com");
 $crawler->setCrawlingDepthLimit(1);
 // Only receive content of files with content-type "text/html"
 //$crawler->addContentTypeReceiveRule("#text/html#");
