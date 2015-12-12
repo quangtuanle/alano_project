@@ -20,6 +20,9 @@ class MyCrawler extends PHPCrawler
 		$Link = $p->url;
 		$theloai =  "tin tuc";
 		$NgayDang = "";
+		$Like = 0;
+		$Comments = 0;
+		$date = null;
 	//	echo "Ten cua bai viet:";
 		$Name = "";
 		$TagTT ="";
@@ -29,12 +32,13 @@ class MyCrawler extends PHPCrawler
 		$anchors = $dom->getElementsByTagName('h1');
 				foreach ($anchors as $element) 
 				{	
-				
+				if($element->getAttribute("class") == "art-title")
 						$Name= $element->nodeValue;
 						//echo "<br>";
 				
 				}
-		
+		if($Name =="")
+			return;
 		//echo "<br>";
 		//echo "Tag của bài viết.<br>";
 			$dom = new DOMDocument('1.0');
@@ -60,11 +64,23 @@ class MyCrawler extends PHPCrawler
 					
 					if($element->getAttribute("class") == "fl-right dt")
 					{
-						//echo "có.<br>";
-						$NgayDang = $element->nodeValue;
-						//echo  $element->getAttribute('href');
-						//$s1 = CopyPartString($element->getAttribute('href'),"/","/");
-						//echo "<br>";
+						
+						$charDT = $element->nodeValue;
+						//echo $charDT."<br>";
+						//$gio =  rtrim($charDT,"AM,");
+						//$ngay =  ltrim($charDT,"AM,");
+						$gios = substr($charDT,0,5);
+						$ngays = substr($charDT,10,10);
+						
+						$charDT = $ngays ." " . $gios;
+						 $format = 'd-m-Y H:i';
+						//echo $charDT."<br>";
+						 $charDT = DateTime::createFromFormat($format, $charDT);
+						// echo $date.Tostring();
+						//if($date == null)
+						//	echo "null";
+						 $date =  $charDT->format('Y-m-d H:i:s');
+						// echo $date;
 					}
 				}
 		
@@ -76,12 +92,13 @@ class MyCrawler extends PHPCrawler
 		$anchors = $dom->getElementsByTagName('p');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("itemprop") == "description")
+					if($element->getAttribute("style") == "text-align: justify;")
 					{				
 									
-						$Description = $element->nodeValue;				
+						$Description ="$Description , $element->nodeValue";				
 						//echo $element->getAttribute("p");
 						//echo "<br>";
+					//	echo $Description;
 					}
 				}		
 			
@@ -110,10 +127,20 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-
-		$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,)
-		VALUES ('.$Link.', '.$Name.', '.$theloai.','.$TagTT.','.$Description.')";
-		
+		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$result = $conn->query($sql);
+		//echo "$Link";
+		//echo $result->num_rows;
+		if ($result->num_rows == 0) 
+		{
+    // output data of each row
+			//while($row = $result->fetch_assoc()) {
+			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
+			$Link = mysqli_real_escape_string($conn,$Link);
+			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$date')";
+			echo "<br>";
+			//echo $sql;
 			$conn->query("set names 'utf8'");  
 			if ($conn->query($sql) === TRUE) 
 			{
@@ -124,7 +151,9 @@ class MyCrawler extends PHPCrawler
 				echo "error:" .$conn->error;
 			//	echo "Error: " . $sql . "<br>" . $conn->error;
 			}
-$conn->close();
+		}
+		
+		$conn->close();
 
 	}
 	}	
@@ -151,7 +180,7 @@ $conn->close();
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://www.doisongphapluat.com");
+$crawler->setURL("http://www.doisongphapluat.com/");
 $crawler->setCrawlingDepthLimit(1);
 // Only receive content of files with content-type "text/html"
 //$crawler->addContentTypeReceiveRule("#text/html#");
