@@ -28,18 +28,20 @@ class MyCrawler extends PHPCrawler
 		$Name = "";
 		$TagTT ="";
 		$Description = "";
-		$date = null;
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
-		$anchors = $dom->getElementsByTagName('h1');
+		$anchors = $dom->getElementsByTagName('p');
 				foreach ($anchors as $element) 
-				{	if($element->getAttribute("class") == "title_detail_video width_common")	
-						return;
-					$Name = $element->nodeValue;
-					echo "<br>";
+				{			
+					if($element->getAttribute("class") == "title")
+					{
+						$Name = $element->nodeValue;
+
+					}
+					
+				//	echo "<br>";
 				}
-		if($Name =="")
-			return;
+
 			$dom = new DOMDocument('1.0');
 				@$dom->loadHTMLFile($p->url);
 				$anchors = $dom->getElementsByTagName('a');
@@ -55,46 +57,26 @@ class MyCrawler extends PHPCrawler
 
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
-		$anchors2 = $dom->getElementsByTagName('div');
+		$anchors2 = $dom->getElementsByTagName('a');
 				foreach ($anchors2 as $element) 
 				{					
-					if($element->getAttribute("class") == "block_timer left txt_666")
+					if($element->getAttribute("class") == "btn_quantam")
 					{
-						$charDT = $element->nodeValue;
-						//echo $charDT;
-						$charDT = rtrim($charDT,"GMT+7 ");
-						 $n = strcspn($charDT,",");
-						// echo $n;
-						//echo substr('abcdef', 1, 3);  // bcd
-						$charDT = substr($charDT,$n+2,18);
-						$charDT = str_replace("|"," ",$charDT);
-						$charDT = str_replace("/","-",$charDT);
-						// echo $charDT;
-						 $format = 'd-m-Y H:i';
-						
-						 $date = DateTime::createFromFormat($format, $charDT);
-						// echo $date.Tostring();
-						//if($date == null)
-						//	echo "null";
-					//echo $date;
-					echo $p->url;
-					if($date != null)
-						$charDT =  $date->format('Y-m-d H:i:s');
-						 
-						break;
+						echo $element->getAttribute("total-like");
+	
 					}
 				}
 
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);	
-		$anchors = $dom->getElementsByTagName('span');
+		$anchors = $dom->getElementsByTagName('p');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("class") == "fck_detail width_common")
+					if($element->getAttribute("class") == "Normal")
 					{				
 									
 						$Description = $element->nodeValue;				
-					
+						//echo $Description;
 					}
 				}		
 
@@ -107,20 +89,10 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
-		$result = $conn->query($sql);
-		//echo "$Link";
-		//echo $result->num_rows;
-		if ($result->num_rows == 0) 
-		{
-    // output data of each row
-			//while($row = $result->fetch_assoc()) {
-			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
-			$Link = mysqli_real_escape_string($conn,$Link);
-			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT')";
-			echo "<br>";
-			//echo $sql;
+
+		$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh)
+		VALUES ('.$Link.', '.$Name.', '.$theloai.','.$TagTT.','.$Description.')";
+		
 			$conn->query("set names 'utf8'");  
 			if ($conn->query($sql) === TRUE) 
 			{
@@ -131,9 +103,7 @@ class MyCrawler extends PHPCrawler
 				echo "error:" .$conn->error;
 			//	echo "Error: " . $sql . "<br>" . $conn->error;
 			}
-		}
-		
-		$conn->close();
+$conn->close();
 
 	}
 	
@@ -149,8 +119,8 @@ class MyCrawler extends PHPCrawler
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://vnexpress.net");
-$crawler->setCrawlingDepthLimit(3);
+$crawler->setURL("http://ngoisao.net");
+$crawler->setCrawlingDepthLimit(1);
 
 $crawler->enableCookieHandling(true);
 

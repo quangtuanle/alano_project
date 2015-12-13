@@ -181,7 +181,7 @@ $crawler = new MyCrawler();
 
 // URL to crawl
 $crawler->setURL("http://www.doisongphapluat.com/");
-$crawler->setCrawlingDepthLimit(1);
+$crawler->setCrawlingDepthLimit(3);
 // Only receive content of files with content-type "text/html"
 //$crawler->addContentTypeReceiveRule("#text/html#");
 

@@ -2,7 +2,7 @@
 <?php
 // It may take a whils to crawl a site ...
 set_time_limit(10000);
-//$myfile = fopen("testfile.txt", "w");
+$myfile = fopen("testfile.txt", "w");
 $depth =2;
 // Inculde the phpcrawl-mainclass
 include("PHPCrawl_083/libs/PHPCrawler.class.php");
@@ -17,13 +17,13 @@ class MyCrawler extends PHPCrawler
 	
 	function handleDocumentInfo(PHPCrawlerDocumentInfo $p)
 	{ 
-		$date = null;
+		$depth = 3;
 		$servername = "localhost";
 		$username = "root";
 		$password = "";
 		$dbname = "alano";
 		$Link = $p->url;
-		$theloai =  "tin tuc";
+		$theloai =  "Thể thao";
 	//	echo "Ten cua bai viet:";
 		$Name = "";
 		$TagTT ="";
@@ -32,11 +32,11 @@ class MyCrawler extends PHPCrawler
 		@$dom->loadHTMLFile($p->url);
 		$anchors = $dom->getElementsByTagName('h1');
 				foreach ($anchors as $element) 
-				{	
-					if($element->getAttribute("class") =="title")
-					
+				{			
+				if($element->getAttribute("class") == "title")
 					$Name = $element->nodeValue;
-					//echo "<br>";
+					
+					echo "<br>";
 				}
 
 			$dom = new DOMDocument('1.0');
@@ -45,10 +45,10 @@ class MyCrawler extends PHPCrawler
 				foreach ($anchors as $element) 
 				{
 					
-					if($element->getAttribute("class") == "block art-tag pkg")
+					if($element->getAttribute("class") == "tags-list")
 					{
-						$TagTT ="$TagTT , $element->nodeValue  ";
-
+						$TagTT = $element->nodeValue;
+						
 					}
 				}
 
@@ -59,57 +59,21 @@ class MyCrawler extends PHPCrawler
 				{					
 					if($element->getAttribute("class") == "btn_quantam")
 					{
-					//	echo $element->getAttribute("total-like");
+						echo $element->getAttribute("total-like");
 	
 					}
 				}
-				
-				
-		$dom = new DOMDocument('1.0');
-		@$dom->loadHTMLFile($p->url);
-		$anchors2 = $dom->getElementsByTagName("div");
-				foreach ($anchors2 as $element) 
-				{					
-					if($element->getAttribute("class") == "right metadata")
-					{
-						$charDT = $element->nodeValue;
-					//	echo $charDT;
-						//$charDT = rtrim($charDT,"ngày");
-						//echo $charDT;
-						//$charDT = ltrim($charDT," AM");
-						 $n = strcspn($charDT,"AM");
-					// echo $n;
-						//echo substr('abcdef', 1, 3);  // bcd
-						$charDT = substr($charDT,49,18);
-						$charDT = str_replace("| ","",$charDT);
-						$charDT = str_replace(".","-",$charDT);
-					//	 echo $charDT;
-						 $format = 'd-m-Y H:i';
-						
-						 $date = DateTime::createFromFormat($format, $charDT);
-						// echo $date.Tostring();
-						//if($date == null)
-						//	echo "null";
-						//echo $date;
-						//echo $p->url;
-						if($date != null)
-							$charDT =  $date->format('Y-m-d H:i:s');
-						// echo $charDT;
-						break;
-					}
-				}
-				
-				
+
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);	
 		$anchors = $dom->getElementsByTagName('div');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("id") == "main-detail")
+					if($element->getAttribute("class") == "ArticleContent")
 					{				
 									
 						$Description = $element->nodeValue;				
-					
+						
 					}
 				}		
 
@@ -122,22 +86,10 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
-		$result = $conn->query($sql);
-		//echo "$Link";
-		//echo $result->num_rows;
-		if ($result->num_rows == 0) 
-		{
-    // output data of each row
-			//while($row = $result->fetch_assoc()) {
-			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
-			$Link = mysqli_real_escape_string($conn,$Link);
-			$Name = mysqli_real_escape_string($conn,$Name);
-			//$Name = mysqli_real_escape_string($conn,$Name);
-			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT')";
-			echo "<br>";
-			//echo $sql;
+
+		$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh)
+		VALUES ('.$Link.', '.$Name.', '.$theloai.','.$TagTT.','.$Description.')";
+		
 			$conn->query("set names 'utf8'");  
 			if ($conn->query($sql) === TRUE) 
 			{
@@ -148,9 +100,7 @@ class MyCrawler extends PHPCrawler
 				echo "error:" .$conn->error;
 			//	echo "Error: " . $sql . "<br>" . $conn->error;
 			}
-		}
-		
-		$conn->close();
+$conn->close();
 
 	}
 	
@@ -166,8 +116,8 @@ class MyCrawler extends PHPCrawler
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://www.nguoiduatin.vn/phi-cong-tre-xuong-tay-voi-nguoi-tinh-gia-vi-tuong-la-ma-a219276.html");
-$crawler->setCrawlingDepthLimit(0);
+$crawler->setURL("http://vietnamnet.vn");
+$crawler->setCrawlingDepthLimit(1);
 
 $crawler->enableCookieHandling(true);
 

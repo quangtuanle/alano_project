@@ -30,11 +30,13 @@ class MyCrawler extends PHPCrawler
 		@$dom->loadHTMLFile($p->url);
 		$anchors = $dom->getElementsByTagName('h1');
 				foreach ($anchors as $element) 
-				{			
+				{		
+				if($element->getAttribute("class") == "baiviet-title")	
 					$Name = $element->nodeValue;
 					echo "<br>";
 				}
-		
+		if($Name == "")
+			return;
 		//echo "<br>";
 		//echo "Tag của bài viết.<br>";
 			$dom = new DOMDocument('1.0');
@@ -92,9 +94,14 @@ class MyCrawler extends PHPCrawler
 		$anchors = $dom->getElementsByTagName('div');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("itemprop") == "articleBody")
+					if($element->getAttribute("class") == "text-conent")
 					{				
+					
 						$Description = $element->nodeValue;	
+					$n = strcspn($charDT,';	');
+						// echo $n;
+						$Description = substr($Description,$n + 107);
+						//echo $Description;
 					}
 				}		
 			
@@ -109,11 +116,20 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-
-		$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-		VALUES ('.$Link.', '.$Name.', '.$theloai.','.$TagTT.','.$Description.','$charDT')";
-
-		
+		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$result = $conn->query($sql);
+		//echo "$Link";
+		//echo $result->num_rows;
+		if ($result->num_rows == 0) 
+		{
+    // output data of each row
+			//while($row = $result->fetch_assoc()) {
+			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
+			$Link = mysqli_real_escape_string($conn,$Link);
+			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT')";
+			echo "<br>";
+			//echo $sql;
 			$conn->query("set names 'utf8'");  
 			if ($conn->query($sql) === TRUE) 
 			{
@@ -121,10 +137,13 @@ class MyCrawler extends PHPCrawler
 			}
 			else 
 			{
-				echo "Error" .$conn->error;
+				echo "error:" .$conn->error;
 			//	echo "Error: " . $sql . "<br>" . $conn->error;
 			}
-$conn->close();
+		}
+		
+		$conn->close();
+
 	}
 	}	
 
@@ -139,8 +158,8 @@ $conn->close();
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://www.24h.com.vn/tin-tuc-trong-ngay/gap-cao-thu-tri-nho-co-kha-nang-ghi-nho-day-1800-so-c46a755597.html");
-$crawler->setCrawlingDepthLimit(0);
+$crawler->setURL("http://www.24h.com.vn");
+$crawler->setCrawlingDepthLimit(3);
 
 $crawler->enableCookieHandling(true);
 
