@@ -28,17 +28,7 @@ function compare(array $TinTuc1, array $TinTuc2)
 	//Đếm số tag giống nhau
 	$tag = sameRatio($TinTuc1["Tag"],$TinTuc2["Tag"]);
 	
-	//So sánh nội dung chính, chỉ so sánh các danh từ riêng
-	for ($i = 0; $i < strlen($TinTuc1["NoidungChinh"]) - 2; $i++)
-		if ($TinTuc1["NoidungChinh"][$i] == "." || $TinTuc1["NoidungChinh"][$i] == ":")
-			if ($TinTuc1["NoidungChinh"][$i+2] >= 'A' && $TinTuc1["NoidungChinh"][$i+2] <= 'Z')
-				$TinTuc1["NoidungChinh"][$i+2] = strtolower($TinTuc1["NoidungChinh"][$i+2]);
-	
-	for ($i = 0; $i < strlen($TinTuc2["NoidungChinh"]) - 2; $i++)
-		if ($TinTuc2["NoidungChinh"][$i] == "." || $TinTuc2["NoidungChinh"][$i] == ":")
-			if ($TinTuc2["NoidungChinh"][$i+2] >= 'A' && $TinTuc2["NoidungChinh"][$i+2] <= 'Z')
-				$TinTuc2["NoidungChinh"][$i+2] = strtolower($TinTuc2["NoidungChinh"][$i+2]);
-	
+	//So sánh nội dung chính, chỉ so sánh các danh từ riêng	
 	$noidung1 = preg_split("/[ \n\t,.:']/", $TinTuc1["NoidungChinh"], -1, PREG_SPLIT_NO_EMPTY);
 	$noidung2 = preg_split("/[ \n\t,.:']/", $TinTuc2["NoidungChinh"], -1, PREG_SPLIT_NO_EMPTY);
 		
@@ -62,10 +52,8 @@ function compare(array $TinTuc1, array $TinTuc2)
 	$noidung = $sameword/$countupper;
 	
 	$avg = 0.4*$tieude + 0.25*$noidung + 0.15*$tomtat + 0.2*$tag;
-	
-	//echo $tieude . " + " . $noidung . " + " . $tomtat . " + " . $tag . " = " . $avg . "<br>";
-	
-	if ($avg >= 0.75)
+
+	if ($avg >= 0.65)
 		return true;
 }
 
@@ -105,8 +93,6 @@ else
 				//Nếu 2 tin được cho là có nội dung giống nhau
 				if (compare($TinTucInfo[$i],$TinTucInfo[$j]))
 				{					
-					//echo ($i+1) . " = " . ($j+1) . "<br>";
-					
 					//Tăng số bài trùng của mỗi tin lên 1
 					$TinTucInfo[$i]["SoBaiTrung"] += 1;
 					$TinTucInfo[$j]["SoBaiTrung"] += 1;
@@ -142,20 +128,19 @@ else
 			//Đã duyệt
 			$TinTucInfo[$i]["DaDuyet"] = 1;
 		}
+		
+		//Nếu là bài duy nhất, không có bài tương tự thì đó là bài gốc
+		if ($TinTucInfo[$i]["BaiTuongTu"] == null)
+			$TinTucInfo[$i]["BaiGoc"] = 1;
 	}
 	
 	//Cập nhật lại dữ liệu
 	foreach($TinTucInfo as $tintuc)
 	{
 		$sqlud = "update TinTuc set SoBaiTrung = " . $tintuc["SoBaiTrung"] . ", BaiTuongTu = '" . $tintuc["BaiTuongTu"] . "', BaiGoc = " . $tintuc["BaiGoc"] . ", DaDuyet = " . $tintuc["DaDuyet"] . " where MaTinTuc = " . $tintuc["MaTinTuc"];
-		//$sqlud = "update TinTuc set SoBaiTrung = 0, BaiTuongTu = null, BaiGoc = 0, DaDuyet = 0 where MaTinTuc = " . $tintuc["MaTinTuc"];
-		//echo $sqlud . "<br>";
-		
 		$result = mysqli_query($connection,$sqlud);
 	}
 	
 	$connection->close();
-	
-	echo "Complete!";
 }
 ?>
