@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Kênh chia sẻ thông tin ALANO Việt Nam{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body id="{% block body_id %}{% endblock %}">
+		{# Header #}
+		{% block header %}
+			<header>
+				<div class="navbar navbar-default navbar-static-top" role="navigation">
+					<div class="container">
+						{# Gồm Logo - Các tùy chọn #}
+						<div class="navbar-header">
+                            <a class="navbar-brand" href="{{ path('homepage') }}">
+                                Symfony Demo
+                            </a>
+
+                            <button type="button" class="navbar-toggle"
+                                    data-toggle="collapse"
+                                    data-target=".navbar-collapse">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                        </div>
+						
+						<div class="navbar-collapse collapse">
+                            <ul class="nav navbar-nav navbar-right">
+                                {% block header_navigation_links %}                                 
+                                {% endblock %}
+                            </ul>
+                        </div>						
+					</div>
+				</div>
+			</header>
+		{% endblock %}
+		
+		{# Content #}
+		<div class="container body-container">
+			{% block body %}
+				<div class="row">
+					{# Giao diện chính của Content cột bên trái #}
+					<div id="main" class="col-sm-9">
+						{# {{ include('default/_flash_message.html.twig') }} #}
+						{% block main %}{% endblock %}
+					</div>
+					
+					{# Giao diện content cột bên phải show các Top News #}
+					<div id="sidebar" class="col-sm-3">
+						{% block sidebar %}
+						{% endblock %}
+					</div>
+				</div>
+			{% endblock %}
+		</div>
+		
+		{# Footer #}
+		{% block footer %}
+			<footer>
+				<div class="container">
+					<div class="row">
+						<div id="footer-copyright" class="col-md-6">
+						</div>
+						<div id="footer-resources" class="col-md-6">
+							<p>
+								<a href=""><i class=""></i></a>
+								<a href=""><i class=""></i></a>
+								<a href=""><i class=""></i></a>
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		{% endblock %}		
+        
+		{% block javascripts %}{% endblock %}
+    </body>
+</html>

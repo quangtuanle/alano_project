@@ -1,0 +1,44 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block body_id 'admin_post_index' %}
+
+{% block main %}
+	<h1>Post list</h1>
+	
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>{{ 'label.title' }}</th>
+				<th><i class="fa fa-user"></i></th>
+				<th><i class="fa fa-calendar"></i></th>
+				<th><i class="fa fa-cogs"></i></th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for post in posts %}
+			<tr>
+				<td>{{ post.title }}</td>
+				<td>Email</td>
+				<td>{% if post.publishedAt %}{{ post.publishedAt|localizeddate('short', 'short') }}{% endif %}</td>
+				<td>
+					<div class="item-actions">
+                        <a href="{{ path('admin_post_show', { id: post.id }) }}" class="btn btn-sm btn-default">
+                            {{ 'action.show'|trans }}
+                        </a>
+
+                        {% if post.isAuthor(app.user) %}
+                            <a href="{{ path('admin_post_edit', { id: post.id }) }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-edit"></i> {{ 'action.edit'|trans }}
+                            </a>
+                        {% endif %}
+					</div>
+				</td>
+			</tr>
+		{% else %}
+			<tr>
+				<td colspan="4" align="center">{{ 'post.no_posts_found' }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body_id 'alano_post_show' %}
+
+{% block main %}
+	<h1>{{ post.title }}</h1>
+	
+	{{ post.content }}
+	
+	<div id="post-add-comment" class="well">
+	</div>
+	
+	<h3></h3>	
+{% endblock %}
+
+{% block sidebar %}
+	{% if app.user and post.isAuthor(app.user) %}
+		<div class="section">
+			<a class="btn btn-lg btn-block btn-success" href="{{ path('admin_post_edit', { id: post.id }) }}"></a>
+		</div>
+	{% endif %}
+	
+	{{ parent() }}
+{% endblock %}

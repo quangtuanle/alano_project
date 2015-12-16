@@ -1,0 +1,8 @@
+<div class="menu category">
+	<ul>
+		<li><a href="/homepage">Trang chủ</li>
+		{% for category in categories %}
+			<li><a href="{{ }}">{{ category.name_category }}</a></li>
+		{% endfor %}
+	</ul>
+</div>
