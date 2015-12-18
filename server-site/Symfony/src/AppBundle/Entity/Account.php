@@ -9,12 +9,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Entity
  * @ORM\Table(name="account")
  */
-class Account implements UserInterface
+class Account
 {
 	/**
 	 * @ORM\Column(type="integer")
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\OneToOne(
+     *      targetEntity="Member",
+     *      mappedBy="idAccount",
+     *      orphanRemoval=true
+     * )	
+     * @ORM\OneToOne(
+     *      targetEntity="Staff",
+     *      mappedBy="idAccount",
+     *      orphanRemoval=true
+     * ) 	 
 	 */
 	protected $id;
 	
@@ -75,6 +85,25 @@ class Account implements UserInterface
      * )
      */
 	protected $comments;
+	
+    /**
+     * @ORM\OneToOne(
+     *      targetEntity="Member",
+     *      mappedBy="account",
+     *      orphanRemoval=true
+     * )
+     */
+	protected $member;	
+	
+    /**
+     * @ORM\OneToOne(
+     *      targetEntity="Staff",
+     *      mappedBy="account",
+     *      orphanRemoval=true
+     * )
+     */
+	protected $staff;	
+	
     /**
      * Constructor
      */
@@ -353,45 +382,52 @@ class Account implements UserInterface
     {
         return $this->comments;
     }
-	
+
     /**
-     * Returns the roles or permissions granted to the user for security.
+     * Set member
+     *
+     * @param \AppBundle\Entity\Member $member
+     *
+     * @return Account
      */
-    public function getRoles()
+    public function setMember(\AppBundle\Entity\Member $member = null)
     {
-        $roles = $this->roles;
+        $this->member = $member;
 
-        // guarantees that a user always has at least one role for security
-        if (empty($roles)) {
-            $roles[] = 'ROLE_USER';
-        }
-
-        return array_unique($roles);
-    }
-
-    public function setRoles(array $roles)
-    {
-        $this->roles = $roles;
+        return $this;
     }
 
     /**
-     * Returns the salt that was originally used to encode the password.
+     * Get member
+     *
+     * @return \AppBundle\Entity\Member
      */
-    public function getSalt()
+    public function getMember()
     {
-        // See "Do you need to use a Salt?" at http://symfony.com/doc/current/cookbook/security/entity_provider.html
-        // we're using bcrypt in security.yml to encode the password, so
-        // the salt value is built-in and you don't have to generate one
-
-        return;
+        return $this->member;
     }
 
     /**
-     * Removes sensitive data from the user.
+     * Set staff
+     *
+     * @param \AppBundle\Entity\Staff $staff
+     *
+     * @return Account
      */
-    public function eraseCredentials()
+    public function setStaff(\AppBundle\Entity\Staff $staff = null)
     {
-        // if you had a plainPassword property, you'd nullify it here
-        // $this->plainPassword = null;
-    }	
+        $this->staff = $staff;
+
+        return $this;
+    }
+
+    /**
+     * Get staff
+     *
+     * @return \AppBundle\Entity\Staff
+     */
+    public function getStaff()
+    {
+        return $this->staff;
+    }
 }

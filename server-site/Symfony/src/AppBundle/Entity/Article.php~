@@ -17,63 +17,63 @@ class Article
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=100)
      */
-    private $title;
+    protected $title;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $summary;
+    protected $summary;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $content;
+    protected $content;
 
     /**
      * @ORM\Column(type="datetime")
 	 * @Assert\DateTime()
      */
-    private $publishedAt;
+    protected $publishedAt;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numView;
+	protected $numView;
 
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numLike;
+	protected $numLike;
 
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numUnlike;
+	protected $numUnlike;
 
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numShare;	
-	
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
-	private $tag; 
+	protected $numShare;	
 	
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 */
-	private $specialTag; 	
+	protected $tag; 
+	
+	/**
+	 * @ORM\Column(type="string", length=100)
+	 */
+	protected $specialTag; 	
 
 	/**
-	 * @ORM\Column(type="integer")
+	 * ORM\Column(type="integer")
 	 */
-	private $author; 	
+	//private $author; 	
 	
 	/**
      * @ORM\ManyToOne(
@@ -81,9 +81,9 @@ class Article
      *      inversedBy="articles"
      * )
 	 * @ORM\OrderBy({"publishedAt" = "DESC"})
-	 * @ORM\JoinColumn(name="author", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="idAuthor", referencedColumnName="id")
      */
-    private $account;	
+    protected $account;	
 	
     /**
      * @ORM\OneToMany(
@@ -93,7 +93,16 @@ class Article
      * )
      * @ORM\OrderBy({"publishedAt" = "DESC"})
      */
-    private $comments;
+    protected $comments;
+    
+    /**
+     * @ORM\OneToOne(
+     *      targetEntity="DetailArticle",
+     *      mappedBy="article",
+     *      orphanRemoval=true
+     * )
+     */
+	protected $detailArticle;	
     /**
      * Constructor
      */
@@ -353,30 +362,6 @@ class Article
     }
 
     /**
-     * Set author
-     *
-     * @param integer $author
-     *
-     * @return Article
-     */
-    public function setAuthor($author)
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
-    /**
-     * Get author
-     *
-     * @return integer
-     */
-    public function getAuthor()
-    {
-        return $this->author;
-    }
-
-    /**
      * Set account
      *
      * @param \AppBundle\Entity\Account $account
@@ -432,5 +417,29 @@ class Article
     public function getComments()
     {
         return $this->comments;
+    }
+
+    /**
+     * Set detailArticle
+     *
+     * @param \AppBundle\Entity\DetailArticle $detailArticle
+     *
+     * @return Article
+     */
+    public function setDetailArticle(\AppBundle\Entity\DetailArticle $detailArticle = null)
+    {
+        $this->detailArticle = $detailArticle;
+
+        return $this;
+    }
+
+    /**
+     * Get detailArticle
+     *
+     * @return \AppBundle\Entity\DetailArticle
+     */
+    public function getDetailArticle()
+    {
+        return $this->detailArticle;
     }
 }

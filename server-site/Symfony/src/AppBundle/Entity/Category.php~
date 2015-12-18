@@ -15,12 +15,21 @@ class Category
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
-	private $id;
+	protected $id;
 	
 	/**
 	 * @ORM\Column(type="string", length=30)
 	 */
-	private $nameCategory;
+	protected $nameCategory;
+   
+    /**
+     * @ORM\OneToOne(
+     *      targetEntity="DetailArticle",
+     *      mappedBy="category",
+     *      orphanRemoval=true
+     * )
+     */
+	protected $detailArticle;		
 
     /**
      * Get id
@@ -54,5 +63,29 @@ class Category
     public function getNameCategory()
     {
         return $this->nameCategory;
+    }
+
+    /**
+     * Set detailArticle
+     *
+     * @param \AppBundle\Entity\DetailArticle $detailArticle
+     *
+     * @return Category
+     */
+    public function setDetailArticle(\AppBundle\Entity\DetailArticle $detailArticle = null)
+    {
+        $this->detailArticle = $detailArticle;
+
+        return $this;
+    }
+
+    /**
+     * Get detailArticle
+     *
+     * @return \AppBundle\Entity\DetailArticle
+     */
+    public function getDetailArticle()
+    {
+        return $this->detailArticle;
     }
 }

@@ -15,38 +15,38 @@ class Comment
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
-	private $id;
+	protected $id;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $content;
+	protected $content;
 	
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	private $publishedAt;
+	protected $publishedAt;
 	
     /**
      * @ORM\ManyToOne(targetEntity="Article", inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $article;
+    protected $article;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numLike;
+	protected $numLike;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numUnLike;
+	protected $numUnLike;
 	
 	/**
-	 * @ORM\Column(type="string", length=50)
+	 * ORM\Column(type="string", length=50)
 	 */
-	private $author; 	
+	//private $author; 	
 	
 	/**
      * @ORM\ManyToOne(
@@ -54,9 +54,9 @@ class Comment
      *      inversedBy="comments"
      * )
 	 * @ORM\OrderBy({"publishedAt" = "DESC"})
-	 * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
+	 * @ORM\JoinColumn(name="idWritter", referencedColumnName="id")
      */
-    private $account;	
+    protected $account;	
 
     /**
      * Get id
@@ -162,30 +162,6 @@ class Comment
     public function getNumUnLike()
     {
         return $this->numUnLike;
-    }
-
-    /**
-     * Set author
-     *
-     * @param string $author
-     *
-     * @return Comment
-     */
-    public function setAuthor($author)
-    {
-        $this->author = $author;
-
-        return $this;
-    }
-
-    /**
-     * Get author
-     *
-     * @return string
-     */
-    public function getAuthor()
-    {
-        return $this->author;
     }
 
     /**

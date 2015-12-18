@@ -15,65 +15,35 @@ class DetailArticle
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
-	private $id;	
+	protected $id;	
 	
 	/**
-	 * @ORM\Column(type="integer")
+	 * ORM\Column(type="integer")
 	 */
-	private $idArticle;
+	//private $idArticle;
 	
 	/**
-	 * @ORM\Column(type="integer")
+	 * ORM\Column(type="integer")
 	 */
-	private $idCategory;
-
-    /**
-     * Set idArticle
-     *
-     * @param integer $idArticle
-     *
-     * @return DetailArticle
+	//private $idCategory;
+	
+	/**
+     * @ORM\OneToOne(
+     *      targetEntity="Article",
+     *      inversedBy="detailArticle"
+     * )
+	 * @ORM\JoinColumn(name="idArticle", referencedColumnName="id")
      */
-    public function setIdArticle($idArticle)
-    {
-        $this->idArticle = $idArticle;
-
-        return $this;
-    }
-
-    /**
-     * Get idArticle
-     *
-     * @return integer
+    protected $article;		
+	
+	/**
+     * @ORM\OneToOne(
+     *      targetEntity="Category",
+     *      inversedBy="detailArticle"
+     * )
+	 * @ORM\JoinColumn(name="idCategory", referencedColumnName="id")
      */
-    public function getIdArticle()
-    {
-        return $this->idArticle;
-    }
-
-    /**
-     * Set idCategory
-     *
-     * @param integer $idCategory
-     *
-     * @return DetailArticle
-     */
-    public function setIdCategory($idCategory)
-    {
-        $this->idCategory = $idCategory;
-
-        return $this;
-    }
-
-    /**
-     * Get idCategory
-     *
-     * @return integer
-     */
-    public function getIdCategory()
-    {
-        return $this->idCategory;
-    }
+    protected $category;		
 
     /**
      * Get id
@@ -83,5 +53,53 @@ class DetailArticle
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set article
+     *
+     * @param \AppBundle\Entity\Article $article
+     *
+     * @return DetailArticle
+     */
+    public function setArticle(\AppBundle\Entity\Article $article = null)
+    {
+        $this->article = $article;
+
+        return $this;
+    }
+
+    /**
+     * Get article
+     *
+     * @return \AppBundle\Entity\Article
+     */
+    public function getArticle()
+    {
+        return $this->article;
+    }
+
+    /**
+     * Set category
+     *
+     * @param \AppBundle\Entity\Category $category
+     *
+     * @return DetailArticle
+     */
+    public function setCategory(\AppBundle\Entity\Category $category = null)
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * Get category
+     *
+     * @return \AppBundle\Entity\Category
+     */
+    public function getCategory()
+    {
+        return $this->category;
     }
 }

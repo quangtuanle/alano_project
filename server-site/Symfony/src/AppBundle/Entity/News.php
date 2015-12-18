@@ -16,77 +16,77 @@ class News
 	 * @ORM\Id
 	 * @ORM\GeneratedValue(strategy="AUTO")
 	 */
-	private $id;
+	protected $id;
 	
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 */
-	private $title;
+	protected $title;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $summary;
+	protected $summary;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $content;
+	protected $content;
 	
 	/**
 	 * @ORM\Column(type="string", length=50)
 	 */
-	private $author;
+	protected $author;
 
 	/**
 	 * @ORM\Column(type="datetime")
 	 */
-	private $publishedAt;
+	protected $publishedAt;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $linkSource;
+	protected $linkSource;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $statusLink;
+	protected $statusLink;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numLike;
+	protected $numLike;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numShare;
+	protected $numShare;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numComment;
+	protected $numComment;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $sameNews;
+	protected $sameNews;
 	
 	/**
 	 * @ORM\Column(type="string", length=50)
 	 */
-	private $category;
+	protected $category;
 	
 	/**
 	 * @ORM\Column(type="text")
 	 */
-	private $tag;
+	protected $tag;
 	
 	/**
 	 * @ORM\Column(type="integer")
 	 */
-	private $numSame;
+	protected $numSame;
 
     /**
      * Get id

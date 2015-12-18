@@ -47,7 +47,7 @@ class DefaultController extends Controller
 		$article->setNumLike(0);
 		$article->setNumUnlike(0);		
 		$article->setNumShare(0);	
-		$article->setAuthor($account);
+		$article->setAccount($account);
 		
 		$form = $this->createFormBuilder($article)
 			->add('title', 'text')
