@@ -23,19 +23,24 @@ class MyCrawler extends PHPCrawler
 		$Like = 0;
 		$Comments = 0;
 		$date = null;
+		$nCommand=null;
+		$nLike = null;
 	//	echo "Ten cua bai viet:";
 		$Name = "";
 		$TagTT ="";
 		$Description = "";
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
-		$anchors = $dom->getElementsByTagName('h1');
+		$anchors = $dom->getElementsByTagName('p');
 				foreach ($anchors as $element) 
 				{	
-				if($element->getAttribute("class") == "art-title")
-						$Name= $element->nodeValue;
-						//echo "<br>";
-				
+				if($element->getAttribute("class") == "fl-right dt"){
+						echo "asdsada";
+						//$element2 = $element->childNodes;
+						$Name = $element->nodeValue;
+						echo $Name;
+				}
+						
 				}
 		if($Name =="")
 			return;
@@ -50,7 +55,7 @@ class MyCrawler extends PHPCrawler
 					if($element->getAttribute("property") == "article:tag")
 					{
 						
-						$TagTT ="$TagTT ,  $element->getAttribute('content')";
+						echo $TagTT ="$TagTT ,  $element->getAttribute('content')";
 						
 						//echo "<br>";
 					}
@@ -80,7 +85,7 @@ class MyCrawler extends PHPCrawler
 						//if($date == null)
 						//	echo "null";
 						 $date =  $charDT->format('Y-m-d H:i:s');
-						// echo $date;
+						 echo $date;
 					}
 				}
 		
@@ -98,26 +103,59 @@ class MyCrawler extends PHPCrawler
 						$Description ="$Description , $element->nodeValue";				
 						//echo $element->getAttribute("p");
 						//echo "<br>";
-					//	echo $Description;
+					
 					}
 				}		
+				echo $Description;
+$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" >source.html";
+ exec( $cmd , $output,$s);
+ $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('label');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("id") == "total_comment")
+					{				
+					
+						$nCommand = $element->nodeValue;				
+						echo $nCommand ."<br>";	
+						//sleep(10);
+					}
+				}
+ $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('iframe');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("title") == "fb:share_button Facebook Social Plugin")
+					{				
+									
+						$LinkLike = $element->getAttribute('src');				
+						echo $LinkLike;	
+						//sleep(10);
+					}
+				}
 			
-			
-		//$myfile = fopen("testfile.txt", "w");
-		//fwrite($myfile, $p->source );
-			//echo $p->source;
-	//	echo "1: $p->header.<br>.$p->url.<br>";
-	//$arrayTitle = $p->meta_attributes;
-	//echo $arrayTitle[1];
-	
-	//	foreach ($arrayTitle as $tags)
-	//	{
-	//		echo "$tags.<br>";
-			
-	//	}
-	//	echo "=------------------------------------------------------s.<br>";
-	//fclose($myfile);
-	
+
+$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+	 exec( $cmd , $output,$s);
+	 $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('span');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("class") == "pluginCountTextConnected")
+					{				
+									
+						$nLike = $element->nodeValue;				
+						echo $nLike;	
+						//sleep(10);
+					}
+				}
+//$target = $p->url; // target URL
+
+		//return implode("", $output);				
+echo $Link;
 	if($Name !="")
 	{
 		$conn = new mysqli($servername, $username, $password, $dbname);
@@ -127,7 +165,7 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
 		$result = $conn->query($sql);
 		//echo "$Link";
 		//echo $result->num_rows;
@@ -137,8 +175,8 @@ class MyCrawler extends PHPCrawler
 			//while($row = $result->fetch_assoc()) {
 			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
 			$Link = mysqli_real_escape_string($conn,$Link);
-			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$date')";
+			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_comment,num_like)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nCommand','$nLike')";
 			echo "<br>";
 			//echo $sql;
 			$conn->query("set names 'utf8'");  
@@ -180,8 +218,8 @@ class MyCrawler extends PHPCrawler
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://www.doisongphapluat.com/");
-$crawler->setCrawlingDepthLimit(3);
+$crawler->setURL("http://www.doisongphapluat.com");
+$crawler->setCrawlingDepthLimit(1);
 // Only receive content of files with content-type "text/html"
 //$crawler->addContentTypeReceiveRule("#text/html#");
 

@@ -28,6 +28,8 @@ class MyCrawler extends PHPCrawler
 		$Name = "";
 		$TagTT ="";
 		$Description = "";
+		$nCommand=null;
+		$nLike = null;
 		$date = null;
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
@@ -77,7 +79,7 @@ class MyCrawler extends PHPCrawler
 						//if($date == null)
 						//	echo "null";
 					//echo $date;
-					echo $p->url;
+					//echo $p->url;
 					if($date != null)
 						$charDT =  $date->format('Y-m-d H:i:s');
 						 
@@ -87,17 +89,67 @@ class MyCrawler extends PHPCrawler
 
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);	
-		$anchors = $dom->getElementsByTagName('span');
+		$anchors = $dom->getElementsByTagName('div');
 				foreach ($anchors as $element) 
 				{		
 					if($element->getAttribute("class") == "fck_detail width_common")
 					{				
 									
 						$Description = $element->nodeValue;				
-					
+						//echo $Description;
 					}
-				}		
+				}
+// lay luot like, command
+//$target = "http://vnexpress.net/tin-tuc/phap-luat/chu-muu-tham-sat-6-nguoi-nga-quy-khi-nhan-an-tu-hinh-3329050.html"; // target URL
+$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" >source.html";
+ exec( $cmd , $output,$s);
+ $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('label');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("id") == "total_comment")
+					{				
+					
+						$nCommand = $element->nodeValue;				
+						//echo $nCommand ."<br>";	
+						//sleep(10);
+					}
+				}
+ $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('iframe');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("title") == "fb:like Facebook Social Plugin")
+					{				
+									
+						$LinkLike = $element->getAttribute('src');				
+						//echo $LinkLike;	
+						//sleep(10);
+					}
+				}
+			
 
+$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+	 exec( $cmd , $output,$s);
+	 $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('span');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("class") == "pluginCountTextConnected")
+					{				
+									
+						$nLike = $element->nodeValue;				
+						//echo $nLike;	
+						//sleep(10);
+					}
+				}
+//$target = $p->url; // target URL
+
+		//return implode("", $output);				
+//echo $Link;
 	if($Name !="")
 	{
 		$conn = new mysqli($servername, $username, $password, $dbname);
@@ -107,7 +159,7 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
 		$result = $conn->query($sql);
 		//echo "$Link";
 		//echo $result->num_rows;
@@ -117,8 +169,9 @@ class MyCrawler extends PHPCrawler
 			//while($row = $result->fetch_assoc()) {
 			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
 			$Link = mysqli_real_escape_string($conn,$Link);
-			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT')";
+			$Link = mysqli_real_escape_string($conn,$Link);
+			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_comment,num_like)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nCommand','$nLike')";
 			echo "<br>";
 			//echo $sql;
 			$conn->query("set names 'utf8'");  
@@ -150,7 +203,7 @@ $crawler = new MyCrawler();
 
 // URL to crawl
 $crawler->setURL("http://vnexpress.net");
-$crawler->setCrawlingDepthLimit(3);
+$crawler->setCrawlingDepthLimit(1);
 
 $crawler->enableCookieHandling(true);
 

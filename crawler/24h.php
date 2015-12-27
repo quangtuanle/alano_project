@@ -7,7 +7,7 @@ $myfile = fopen("testfile.txt", "w");
 $depth =2;
 // Inculde the phpcrawl-mainclass
 include("PHPCrawl_083/libs/PHPCrawler.class.php");
-$arryTitle = array('title_news','relative_new','txt_tag');
+//$arryTitle = array('title_news','relative_new','txt_tag');
 
 class MyCrawler extends PHPCrawler 
 {
@@ -25,6 +25,10 @@ class MyCrawler extends PHPCrawler
 	//	echo "Ten cua bai viet:";
 		$Name = "";
 		$TagTT ="";
+		$nLike= null;
+		$nShare = null;
+		$LinkLike="";
+		$LinkShare="";
 		$Description = "";
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
@@ -32,8 +36,10 @@ class MyCrawler extends PHPCrawler
 				foreach ($anchors as $element) 
 				{		
 				if($element->getAttribute("class") == "baiviet-title")	
-					$Name = $element->nodeValue;
-					echo "<br>";
+					 $Name = $element->nodeValue;
+				// echo $Name;
+				//	echo "<br>";
+					
 				}
 		if($Name == "")
 			return;
@@ -51,6 +57,7 @@ class MyCrawler extends PHPCrawler
 						$TagTT ="$TagTT , $element->nodeValue  ";
 					}
 				}
+				//echo $TagTT;
 		//echo "Ngay đang:";
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
@@ -81,7 +88,7 @@ class MyCrawler extends PHPCrawler
 						//echo $p->url;
 						if($date != null)
 							$charDT =  $date->format('Y-m-d H:i:s');
-						// echo $charDT;
+						//echo $charDT;
 						break;
 					}
 				}
@@ -104,9 +111,65 @@ class MyCrawler extends PHPCrawler
 						//echo $Description;
 					}
 				}		
-			
-			
-		
+	// like share		
+$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" >source.html";
+ exec( $cmd , $output,$s);
+ $n = 0;
+$dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('iframe');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("title") == "fb:share_button Facebook Social Plugin")
+					{				
+						$LinkShare = $element->getAttribute('src');				
+						//echo "<br>" .$LinkShare;	
+						
+						//sleep(10);
+					}
+					if($element->getAttribute("title") == "fb:like Facebook Social Plugin")
+					{			
+						$n++;
+						if($n == 3)
+						{
+						$LinkLike = $element->getAttribute('src');				
+					//	echo "<br>" .$LinkLike;	
+						
+						}
+						
+						//sleep(10);
+					}
+				}
+$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkShare\"" ;
+	 exec( $cmd , $output,$s);
+	 $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('span');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("class") == "pluginCountTextConnected")
+					{				
+									
+						$nShare = $element->nodeValue;				
+						//echo "<br>" .$nShare;	
+						//sleep(10);
+					}
+				}
+				$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+	 exec( $cmd , $output,$s);
+	 $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile("source.html");	
+		$anchors = $dom->getElementsByTagName('span');
+				foreach ($anchors as $element) 
+				{		
+					if($element->getAttribute("class") == "pluginCountTextConnected")
+					{				
+									
+						$nLike = $element->nodeValue;				
+						//echo "<br>" .$nLike;	
+						//sleep(10);
+					}
+				}
 	if($Name !="")
 	{
 		$conn = new mysqli($servername, $username, $password, $dbname);
@@ -116,7 +179,7 @@ class MyCrawler extends PHPCrawler
 		{
 		die("Connection failed: " . $conn->connect_error);
 		}
-		$sql = "SELECT * FROM `tintuc` WHERE `DuongLinkGoc` = '$Link'";
+		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
 		$result = $conn->query($sql);
 		//echo "$Link";
 		//echo $result->num_rows;
@@ -126,8 +189,8 @@ class MyCrawler extends PHPCrawler
 			//while($row = $result->fetch_assoc()) {
 			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
 			$Link = mysqli_real_escape_string($conn,$Link);
-			$sql = "INSERT INTO tintuc (DuongLinkGoc,TieuDe,TheLoai,Tag,NoiDungChinh,NgayDang)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT')";
+			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_like,num_share)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nLike','$nShare')";
 			echo "<br>";
 			//echo $sql;
 			$conn->query("set names 'utf8'");  
@@ -145,7 +208,7 @@ class MyCrawler extends PHPCrawler
 		$conn->close();
 
 	}
-	}	
+	}		
 
 	function handleHeaderInfo(PHPCrawlerResponseHeader $header)
 	{
@@ -159,7 +222,7 @@ $crawler = new MyCrawler();
 
 // URL to crawl
 $crawler->setURL("http://www.24h.com.vn");
-$crawler->setCrawlingDepthLimit(3);
+$crawler->setCrawlingDepthLimit(1);
 
 $crawler->enableCookieHandling(true);
 
