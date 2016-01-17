@@ -62,7 +62,7 @@ function compare(array $News1, array $News2)
 	else
 		$content = $sameword/$countupper;
 	
-	$avg = 0.4*$title + 0.25*$content + 0.15*$summary + 0.2*$tag;
+	$avg = 0.35*$title + 0.25*$content + 0.2*$summary + 0.2*$tag;
 	
 	if ($avg >= 0.5)
 	{
@@ -74,7 +74,7 @@ function compare(array $News1, array $News2)
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "alano";
+$database = "alano_website";
 
 // Tạo kết nối đến CSDL
 $connection = new mysqli($servername, $username, $password, $database);
