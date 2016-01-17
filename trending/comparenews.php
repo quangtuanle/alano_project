@@ -60,11 +60,11 @@ function compare(array $News1, array $News2)
 	else
 		$content = $sameword/$countupper;
 	
-	$avg = 0.4*$title + 0.25*$content + 0.15*$summary + 0.2*$tag;
+	$avg = 0.35*$title + 0.25*$content + 0.2*$summary + 0.2*$tag;
 	
 	//echo $avg . "<br/>";
 	
-	if ($avg >= 0.65)
+	if ($avg >= 0.4)
 		return true;
 }
 
@@ -142,7 +142,7 @@ else
 				}
 			}
 			//Tính độ hot
-			$NewsInfo[$i]["hot"] = $NewsInfo[$i]["num_like"]*2 + $NewsInfo[$i]["num_share"]*5 + $NewsInfo[$i]["num_comment"] + $NewsInfo[$i]["num_same"]*5;
+			$NewsInfo[$i]["hot"] = $NewsInfo[$i]["num_like"] + $NewsInfo[$i]["num_share"]*2 + $NewsInfo[$i]["num_comment"]/3 + $NewsInfo[$i]["num_same"]*2;
 			
 			//Đã duyệt
 			$NewsInfo[$i]["reviewed"] = 1;
