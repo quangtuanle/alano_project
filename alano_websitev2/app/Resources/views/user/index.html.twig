@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block body_id 'alano_index' %}
+
+{% block main %}
+	{% for post in posts %}
+		<article class="post">
+			<h2>
+				<a href="{{ path('user_post', { id: post.id }) }}">
+					{{ post.title }}
+				</a>
+			</h2>
+			
+			{{ post.summary }}
+		</article>
+	{% else %}
+		<div class="well">No post found</div>
+	{% endfor %}
+	
+	<div class="navigation text-center">
+	</div>
+{% endblock %}
+
+{% block sidebar %}
+	{{ parent() }}
+
+	
+{% endblock %}
+

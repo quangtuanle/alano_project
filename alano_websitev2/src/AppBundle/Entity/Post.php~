@@ -1,0 +1,83 @@
+<?php
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\PostRepository")
+ *
+ * Defines the properties of the Post entity to represent the blog posts.
+ * See http://symfony.com/doc/current/book/doctrine.html#creating-an-entity-class
+ *
+ * Tip: if you have an existing database, you can generate these entity class automatically.
+ * See http://symfony.com/doc/current/cookbook/doctrine/reverse_engineering.html
+ *
+ */
+class Post
+{
+	/**
+	 * Use constants to define configuration options that rarely change instead
+	 * of specifying them in app/config/config.yml.
+	 * See http://symfony.com/doc/current/best_practices/configuration.html#constants-vs-configuration-options
+	 */
+	const NUM_ITEMS = 10;
+	
+	/**
+	 * @ORM\Id
+	 * @ORM\GeneratedValue
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
+	
+	/**
+	 * @ORM\Column(type="string")
+	 * @Assert\NotBlank()
+	 */
+	private $title;
+	
+	/**
+	 * @ORM\Column(type="string")
+	 */
+	private $slug;
+	
+	/**
+	 * @ORM\Column(type="string")
+	 * @Assert\NotBlank(message="post.blank_summary")
+	 */
+	private $summary;
+
+	/**
+     * @ORM\Column(type="text")
+     * @Assert\NotBlank(message="post.blank_content")
+     * @Assert\Length(min = "10", minMessage = "post.too_short_content")
+     */
+    private $content;
+
+    /**
+     * @ORM\Column(type="string")
+     * @Assert\Email()
+     */
+    private $authorEmail;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @Assert\DateTime()
+     */
+    private $publishedAt;
+
+    /**
+     * @ORM\OneToMany(
+     *      targetEntity="Comment",
+     *      mappedBy="post",
+     *      orphanRemoval=true
+     * )
+     * @ORM\OrderBy({"publishedAt" = "DESC"})
+     */
+    private $comments;
+	 
+}
+ 
+
+?>

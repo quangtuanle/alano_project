@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %} {% endblock %} {# Khong nhan duong dan css nay #}
+
+{% block body_id 'alano_post_show' %}
+
+{% block main %}
+	
+	<div class="post" >
+		<h1>{{ post.title }}</h1>
+		
+		{{ post.content }}
+	</div>
+	
+	<div id="post-add-comment" class="well">
+	</div>
+	
+	<h3></h3>	
+{% endblock %}
