@@ -13,7 +13,9 @@ function sameRatio ($string1, $string2)
 			if ($word1[$i] == $word2[$j])
 				$count++;
 	
-	return $count/count($word1);
+	if (count($word1) != 0)
+		return $count/count($word1);
+	return 0;
 }
 
 //Kiểm tra từ viết hoa
@@ -29,7 +31,7 @@ function compare(array $News1, array $News2)
 	$title = sameRatio($News1["title"],$News2["title"]);
 	
 	//So sánh phần tóm tắt
-	$summary = 0;//sameRatio($News1["summary"],$News2["summary"]);
+	$summary = sameRatio($News1["summary"],$News2["summary"]);
 	
 	//Đếm số tag giống nhau
 	$tag = sameRatio($News1["tag"],$News2["tag"]);
@@ -60,18 +62,19 @@ function compare(array $News1, array $News2)
 	else
 		$content = $sameword/$countupper;
 	
-	$avg = 0.35*$title + 0.25*$content + 0.2*$summary + 0.2*$tag;
+	$avg = 0.4*$title + 0.25*$content + 0.15*$summary + 0.2*$tag;
 	
-	//echo $avg . "<br/>";
-	
-	if ($avg >= 0.4)
+	if ($avg >= 0.5)
+	{
+		
 		return true;
+	}
 }
 
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "alano_website";
+$database = "alano";
 
 // Tạo kết nối đến CSDL
 $connection = new mysqli($servername, $username, $password, $database);
@@ -100,12 +103,9 @@ else
 		{
 			for ($j = $i + 1; $j < count($NewsInfo); $j++)
 			{
-				//echo $i . "so với " . $j . ": ";
 				//Nếu 2 tin được cho là có nội dung giống nhau
 				if (compare($NewsInfo[$i],$NewsInfo[$j]))
-				{	
-					echo $i . "Giống" . $j;
-					
+				{						
 					//Tăng số bài trùng của mỗi tin lên 1
 					$NewsInfo[$i]["num_same"] += 1;
 					$NewsInfo[$j]["num_same"] += 1;
@@ -133,7 +133,12 @@ else
 							$NewsInfo[$i]["original"] = $NewsInfo[$j]["original"];
 							$NewsInfo[$j]["original"] = $temp;
 						}
-						
+						else if ($d1 > $d2 && $NewsInfo[$j]["original"] == 0)
+						{
+							$temp = $NewsInfo[$j]["original"];
+							$NewsInfo[$j]["original"] = $NewsInfo[$i]["original"];
+							$NewsInfo[$i]["original"] = $temp;
+						}
 					}
 					
 					//Đưa vào danh sách các bài tương tự
@@ -157,14 +162,10 @@ else
 	foreach($NewsInfo as $News)
 	{
 		$sqlud = "update News set num_same = " . $News["num_same"] . ", same_news = '" . $News["same_news"] . "', original = " . $News["original"] . ", reviewed = " . $News["reviewed"] . ", hot = " . $News["hot"] . " where id = " . $News["id"];
-		//$sqlud = "update News set num_same = 0, same_news = null, original = 0, reviewed = 0, hot = 0 where id = " . $News["id"];
-		//echo $sqlud . "<br>";
 		
 		$result = mysqli_query($connection,$sqlud);
 	}
 	
 	$connection->close();
-	
-	//echo "Complete!";
 }
 ?>
