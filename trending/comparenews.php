@@ -1,6 +1,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 <?php
+set_time_limit(0);
+
 //Tỉ lệ giống nhau giữa 2 đoạn text
 function sameRatio ($string1, $string2)
 {
