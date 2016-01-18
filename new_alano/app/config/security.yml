@@ -1,0 +1,50 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/book/security.html
+security:
+
+    # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+    providers:
+        #in_memory:
+        #    memory: ~
+        #our_db_provider:
+        #    entity:
+        #        class: AppBundle:User
+                # if you're using multiple entity managers
+                # manager_name: customer
+
+        database_users:
+            entity: { class: AppBundle:User, property: username }
+
+    firewalls:
+        secured_area:
+            pattern: ^/
+
+            anonymous: true
+            # activate different ways to authenticate
+
+            # http_basic: ~
+            # http://symfony.com/doc/current/book/security.html#a-configuring-how-your-users-will-authenticate
+
+            # form_login: ~
+            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            form_login:
+                login_path: security_login_form
+                check_path: security_login_check
+                csrf_provider: security.csrf.token_manager
+
+            logout:
+                # The route name the user can go to in order to logout
+                path: security_logout
+                # The name of the route to redirect to after logging out
+                target: homepage			
+
+    encoders:
+        AppBundle\Entity\User:
+            algorithm: md5
+            encode_as_base64: false
+            iterations: 0
+
+    access_control:
+        # this is a catch-all for the admin area
+        # additional security lives in the controllers
+        - { path: ^/admin, roles: ROLE_ADMIN }
