@@ -158,16 +158,14 @@ else
 		//Nếu là bài duy nhất, không có bài tương tự thì đó là bài gốc
 		if ($NewsInfo[$i]["same_news"] == null)
 			$NewsInfo[$i]["original"] = 1;
-	}
 	
-	//Cập nhật lại dữ liệu
-	foreach($NewsInfo as $News)
-	{
-		$sqlud = "update News set num_same = " . $News["num_same"] . ", same_news = '" . $News["same_news"] . "', original = " . $News["original"] . ", reviewed = " . $News["reviewed"] . ", hot = " . $News["hot"] . " where id = " . $News["id"];
+	
+		//Cập nhật lại dữ liệu
+		$sqlud = "update News set num_same = " . $NewsInfo[$i]["num_same"] . ", same_news = '" . $NewsInfo[$i]["same_news"] . "', original = " . $NewsInfo[$i]["original"] . ", reviewed = " . $NewsInfo[$i]["reviewed"] . ", hot = " . $NewsInfo[$i]["hot"] . " where id = " . $NewsInfo[$i]["id"];
 		
 		$result = mysqli_query($connection,$sqlud);
-	}
 	
+	}
 	$connection->close();
 }
 ?>
