@@ -48,8 +48,39 @@ class SecurityController extends Controller
      */
     public function loginCheckAction()
     {
-        throw new \Exception('This should never be reached!');
-    }
+        //throw new \Exception('This should never be reached!');
+		
+		if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+			# User is a ROLE_ADMIN
+			//return $this->redirectToRoute("admin_post_index");
+			echo "This is Admin";
+		}
+		else if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+			echo "This is User";
+		}
+		else
+		{
+			echo "This is Unknown";
+		}
+		
+		
+		/*
+		// if you're using Symfony 2.1 or greater
+		// where "main" is the name of your firewall in security.yml
+		$key = '_security.main.target_path';
+
+		// try to redirect to the last page, or fallback to the homepage
+		if ($this->container->get('session')->has($key)) {
+			$url = $this->container->get('session')->get($key);
+			$this->container->get('session')->remove($key);
+		} 
+		else {
+			$url = $this->container->get('router')->generate('admin_post_index');
+		}
+
+		return new RedirectResponse($url);
+		*/
+	}
 
     /**
      * This is the route the user can use to logout.
@@ -63,4 +94,32 @@ class SecurityController extends Controller
     {
         throw new \Exception('This should never be reached!');
     }
+	
+	/**
+	 * @Route("/success", name="default_security_target")
+	 */
+	public function redirectSuccessAction()
+	{
+		if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+			# User is a ROLE_ADMIN
+			return $this->redirectToRoute("admin_post_index");
+			//echo "This is Admin";
+		}
+		//else if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+			//echo "This is User";
+		//}
+		else if ($this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
+			
+			return $this->redirectToRoute("super_admin_post_index");
+		}
+		else if ($this->get('security.authorization_checker')->isGranted('ROLE_MEGA_ADMIN')) {
+			
+			return $this->redirectToRoute("mega_admin_post_index");
+		}
+		else
+		{
+			return $this->redirectToRoute("blog_index");
+			//echo "This is Unknown";
+		}
+	}
 }

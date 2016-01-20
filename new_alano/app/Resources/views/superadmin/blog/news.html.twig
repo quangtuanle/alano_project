@@ -1,0 +1,46 @@
+{% extends 'superadmin/layout.html.twig' %}
+
+{% block body_id 'super_admin_post_index' %}
+
+{% block main %}
+    <h1>NEWS LIST</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th> Title </th>
+                <th><i class="fa fa-user"></i> Author </th>
+                <th><i class="fa fa-calendar"></i> Published At </th>
+                <th><i class="fa fa-cogs"></i> Actions </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for news in newses %}
+            <tr>
+                <td>{{ news.title }}</td>
+                {# <td>{{ news.authorEmail }}</td> #}
+                {# <td>{% if news.publishedAt %}{{ news.publishedAt }}{% endif %}</td> #}
+                <td>
+                    <div class="item-actions">
+                        <a href="{{ news.linkSource }}" class="btn btn-sm btn-default">
+                            Show
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" align="center">No newses found</td>
+           </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block sidebar %}
+    <div class="section actions">
+        <a href="{{ path('admin_post_new') }}" class="btn btn-lg btn-block btn-success">
+            <i class="fa fa-plus"></i> CREATE POST
+        </a>
+    </div>
+{% endblock %}

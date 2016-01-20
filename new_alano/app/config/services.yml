@@ -7,3 +7,7 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    # First we define some basic services to make these utilities available in
+    # the entire application
+    slugger:
+        class: AppBundle\Utils\Slugger

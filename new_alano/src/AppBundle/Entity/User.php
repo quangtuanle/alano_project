@@ -51,7 +51,7 @@ class User implements UserInterface
     private $password;
 
     /**
-     * @ORM\Column(type="json_array")
+     * @ORM\Column(type="string")
      */
     private $roles = array();
 
@@ -101,14 +101,16 @@ class User implements UserInterface
         $roles = $this->roles;
 
         // guarantees that a user always has at least one role for security
-        if (empty($roles)) {
-            $roles[] = 'ROLE_USER';
+        if ($roles == "") {
+            $roles = 'ROLE_USER';
         }
 
-        return array_unique($roles);
+        //return array_unique($roles);
+		$arrayRoles = array($roles);
+		return $arrayRoles;
     }
 
-    public function setRoles(array $roles)
+    public function setRoles($roles)
     {
         $this->roles = $roles;
     }

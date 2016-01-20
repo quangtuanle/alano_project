@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\Form\UserType;
 use AppBundle\Entity\User;
+use AppBundle\Entity\UserDatabase;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
@@ -27,7 +28,9 @@ class RegistrationController extends Controller
 				->encodePassword($user, $user->getPlainPassword());
 			$user->setPassword($password);
 			
-			// 4) save the User!
+			// 4) save the User!	
+			$user->setRoles("ROLE_USER");
+			
 			$em = $this->getDoctrine()->getManager();
 			$em->persist($user);
 			$em->flush();

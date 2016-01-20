@@ -32,7 +32,7 @@
         <div class="row post-comment">
             <h4 class="col-sm-3">
                 <strong>{{ comment.authorEmail }}</strong> commented on
-                {#<strong>{{ comment.publishedAt }}</strong>#}
+                <strong>{{ comment.publishedAt|date('Y-m-d H:i:s') }}</strong>
             </h4>
             <div class="col-sm-9">
                 {{ comment.content }}
@@ -40,7 +40,7 @@
         </div>
     {% else %}
         <div class="post-comment">
-            <p>{{ 'post.no_comments'}}</p>
+            <p>No comment</p>
         </div>
     {% endfor %}
 {% endblock %}

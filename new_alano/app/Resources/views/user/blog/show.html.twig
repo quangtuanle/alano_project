@@ -1,6 +1,6 @@
-{% extends 'admin/layout.html.twig' %}
+{% extends 'user/layout.html.twig' %}
 
-{% block body_id 'admin_post_show' %}
+{% block body_id 'user_post_show' %}
 
 {% block main %}
 	<h1>{{ post.title }}</h1>
@@ -29,13 +29,13 @@
 
 {% block sidebar %}
     <div class="section">
-        <a href="{{ path('admin_post_edit', { id: post.id }) }}" class="btn btn-lg btn-block btn-success">
+        <a href="{{ path('user_post_edit', { id: post.id }) }}" class="btn btn-lg btn-block btn-success">
             <i class="fa fa-edit"></i> Edit Content
         </a>
     </div>
 
     <div class="section">
-        {{ include('admin/blog/_form.html.twig', {
+        {{ include('user/blog/_form.html.twig', {
             form: delete_form,
             button_label: 'Delete post',
             button_css: 'btn btn-lg btn-block btn-danger',

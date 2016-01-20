@@ -41,16 +41,16 @@ class PostType extends AbstractType
         $builder
             ->add('title', null, array(
                 'attr' => array('autofocus' => true),
-                'label' => 'label.title',
+                'label' => 'Title',
             ))
-            ->add('summary', 'textarea', array('label' => 'label.summary'))
+            ->add('summary', 'textarea', array('label' => 'Summary'))
             ->add('content', 'textarea', array(
                 'attr' => array('rows' => 20),
-                'label' => 'label.content',
+                'label' => 'Content',
             ))
-            ->add('authorEmail', 'email', array('label' => 'label.author_email'))
-            ->add('publishedAt', 'app_datetimepicker', array(
-                'label' => 'label.published_at',
+            ->add('authorEmail', 'email', array('label' => 'Author email'))
+            ->add('publishedAt', 'datetime', array(
+                'label' => 'Published at',
             ))
         ;
     }

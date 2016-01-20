@@ -1,6 +1,6 @@
-{% extends 'admin/layout.html.twig' %}
+{% extends 'megaadmin/layout.html.twig' %}
 
-{% block body_id 'admin_post_index' %}
+{% block body_id 'mega_admin_post_index' %}
 
 {% block main %}
     <h1>POST LIST</h1>
@@ -22,15 +22,15 @@
                 <td>{% if post.publishedAt %}{{ post.publishedAt|date('Y-m-d H:i:s') }}{% endif %}</td>
                 <td>
                     <div class="item-actions">
-                        <a href="{{ path('admin_post_show', { id: post.id }) }}" class="btn btn-sm btn-default">
+                        <a href="{{ path('mega_admin_post_show', { id: post.id }) }}" class="btn btn-sm btn-default">
                             Show 
                         </a>
 						
-                        {% if post.isAuthor(app.user) %}
-                            <a href="{{ path('admin_post_edit', { id: post.id }) }}" class="btn btn-sm btn-primary">
+                        {# if post.isAuthor(app.user) #}
+                            <a href="{{ path('mega_admin_post_edit', { id: post.id }) }}" class="btn btn-sm btn-primary">
                                 <i class="fa fa-edit"></i> Edit
                             </a>
-                        {% endif %}
+                        {# endif #}
                     </div>
                 </td>
             </tr>
@@ -45,11 +45,11 @@
 
 {% block sidebar %}
     <div class="section actions">
-        <a href="{{ path('admin_post_new') }}" class="btn btn-lg btn-block btn-success">
+        <a href="{{ path('mega_admin_post_new') }}" class="btn btn-lg btn-block btn-success">
             <i class="fa fa-plus"></i> CREATE POST
         </a>
-		<a href="{{ path('news_index') }}" class="btn btn-lg btn-block btn-success">
+        <a href="{{ path('mega_admin_news_index') }}" class="btn btn-lg btn-block btn-success">
             HOT NEWS IN THE WORLD
-        </a>
+        </a>		
     </div>
 {% endblock %}
