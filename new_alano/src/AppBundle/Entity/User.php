@@ -52,8 +52,9 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string")
+     * @Assert\Choice(choices = {"ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN", "ROLE_MEGA_ADMIN"}, message = "Choose a valid gender.")
      */
-    private $roles = array();
+    private $roles;
 
     public function getId()
     {
@@ -113,6 +114,7 @@ class User implements UserInterface
     public function setRoles($roles)
     {
         $this->roles = $roles;
+		return $this;
     }
 
     /**

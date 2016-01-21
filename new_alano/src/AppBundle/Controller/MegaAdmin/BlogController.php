@@ -13,6 +13,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use AppBundle\Entity\Post;
+use AppBundle\Form\UserType;
+use AppBundle\Entity\User;
+use AppBundle\Form\ModType;
 
 /**
  * Controller used to manage blog contents in the backend.
@@ -216,7 +219,7 @@ class BlogController extends Controller
 	{
 		// 1) build the form
 		$user = new User();
-		$form = $this->createForm(new UserType(), $user);
+		$form = $this->createForm(new ModType(), $user);
 		
 		// 2) handle the submit (will only happen on POST)
 		$form->handleRequest($request);
@@ -228,7 +231,21 @@ class BlogController extends Controller
 			
 			// 4) save the User!	
 			// Choose role (ROLE_ADMIN: Editor / ROLE_SUPER_ADMIN: Total Editor / ROLE_MEGA_ADMIN: Pegasus)
-			$user->setRoles("ROLE_USER");
+			//$user->setRoles("ROLE_USER");
+			/*
+			if ($user->getRoles() == '0')
+			{
+				$user->setRoles("ROLE_ADMIN");
+			}
+			else if ($user->getRoles() == '1')
+			{
+				$user->setRoles("ROLE_SUPER_ADMIN");
+			}
+			else
+			{
+				$user->setRoles("ROLE_MEGA_ADMIN");
+			}
+			*/
 			
 			$em = $this->getDoctrine()->getManager();
 			$em->persist($user);
@@ -241,7 +258,7 @@ class BlogController extends Controller
 		}
 		
 		return $this->render(
-			'registration/register.html.twig',
+			'megaadmin/register.html.twig',
 			array('form' => $form->createView())
 		);
 	}
