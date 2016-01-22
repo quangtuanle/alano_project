@@ -6,18 +6,15 @@ $myfile = fopen("testfile.txt", "w");
 $depth =2;
 // Inculde the phpcrawl-mainclass
 include("PHPCrawl_083/libs/PHPCrawler.class.php");
-$arryTitle = array('title_news','relative_new','txt_tag');
-
-
 	
 // Create connection
-		
+
 class MyCrawler extends PHPCrawler 
 {
 	
 	function handleDocumentInfo(PHPCrawlerDocumentInfo $p)
 	{ 
-		$depth = 3;
+	
 		$servername = "localhost";
 		$username = "root";
 		$password = "";
@@ -28,8 +25,7 @@ class MyCrawler extends PHPCrawler
 		$Name = "";
 		$TagTT ="";
 		$Description = "";
-		$nCommand=null;
-		$nLike = null;
+		
 // check connection database
 		$conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -38,38 +34,51 @@ class MyCrawler extends PHPCrawler
 		die("Connection failed: " . $conn->connect_error);
 		return;
 		}
+		
 //check link is exist in "Link not Crawler"
 		$Link = mysqli_real_escape_string($conn,$Link);
 		$sql = "SELECT * FROM `linknotcrawler` WHERE `Link` = '$Link'";
 		$result = $conn->query($sql);
-// process is not exist		
+// process is not exist	
+	
 		if ($result->num_rows > 0) 
 		{
+			
 			return;
-		}		
-		$dom = new DOMDocument('1.0');
-		@$dom->loadHTMLFile($p->url);
+		}	
+		
+		$IName = 0;
+		$LName = strlen($Link);
+		for($i = 0; $i<$LName; $i++)
+		{
+			$IName += ord($Link[$i]);
+		}
+		$HSource = "source"  ."$IName" .".html";
+//$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+$cmd =__DIR__ ."\Driver\Debug\Crawler.exe \"$Link\" $HSource";
+$HSource = "SourceWeb\source"  ."$IName" .".html";
+	 exec( $cmd , $output,$s);
+	 $dom = new DOMDocument('1.0');
+		@$dom->loadHTMLFile($HSource);	
+		
 		$anchors = $dom->getElementsByTagName('h1');
 				foreach ($anchors as $element) 
-				{			
+				{	
 					if($element->getAttribute("class") == "title")
 					{
 						 $Name = $element->nodeValue;
-							//echo $Name;
-					}
+					//	echo $Name;
+					}				
 					
-				//	echo "<br>";
+					//echo "<br>";
 				}
-			if($Name =="")
-			return;
-		$IName = 0;
-		$LName = strlen($Name);
-		for($i = 0; $i<$LName; $i++)
-		{
-			$IName += ord($Name[$i]);
-		}
-				//check is exist
-		$Link = mysqli_real_escape_string($conn,$Link);
+				$Name = trim($Name);
+				if($Name =="")
+				return;
+
+		
+//check is exist		
+
 		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
 		$result = $conn->query($sql);
 		//echo "$Link";
@@ -78,72 +87,62 @@ class MyCrawler extends PHPCrawler
 		if ($result->num_rows == 0) 
 		{
 			$dom = new DOMDocument('1.0');
-				@$dom->loadHTMLFile($p->url);
+				@$dom->loadHTMLFile($HSource);
 				$anchors = $dom->getElementsByTagName('a');
 				foreach ($anchors as $element) 
 				{
 					
-					if($element->getAttribute("class") == "tag_item")
+					if($element->getAttribute("class") == "item_tag")
 					{
-					 	$TagTT ="$TagTT , $element->nodeValue  ";
+						$TagTT ="$TagTT , $element->nodeValue  ";
 
 					}
 				}
-
-					//echo "sada";	
+			$dom = new DOMDocument('1.0');
+			@$dom->loadHTMLFile($HSource);	
+			$anchors = $dom->getElementsByTagName('div');
+					foreach ($anchors as $element) 
+					{		
+						if($element->getAttribute("id") == "remain_detail")
+						{				
+										
+							$Description = $element->nodeValue;				
+						
+						}
+					}		
+					$Description = trim($Description);
 		$dom = new DOMDocument('1.0');
-			@$dom->loadHTMLFile($p->url);
-			$anchors2 = $dom->getElementsByTagName('span');
+			@$dom->loadHTMLFile($HSource);
+			$anchors2 = $dom->getElementsByTagName('div');
 					foreach ($anchors2 as $element) 
 					{					
-						if($element->getAttribute("class") == "spanDateTime fl")
+						if($element->getAttribute("class") == "timepost")
 						{
 							$charDT = $element->nodeValue;
-							//echo $charDT;
+							//echo "cfzv" .$charDT;
 							//$charDT = rtrim($charDT,"ngày");
 							//echo $charDT;
 							//$charDT = ltrim($charDT," AM");
-							 $n = strcspn($charDT,",");
+							// $n = strcspn($charDT,",");
 							// echo $n;
 							//echo substr('abcdef', 1, 3);  // bcd
-							$charDT = substr($charDT,$n+2,15);
+							//$charDT = substr($charDT,$n+2,18);
 							////echo $charDT;
 							//$charDT = str_replace("|"," ",$charDT);
+							//$charDT = str_replace("-","",$charDT);
 							$charDT = str_replace("/","-",$charDT);
-							
-							 $format = 'd-m-Y H:i';
+							// echo $charDT;
+							 $format = 'd-m-Y';
 							
 							 $date = DateTime::createFromFormat($format, $charDT);
 							// echo $date;
-							
 							if($date != null)
 								$charDT =  $date->format('Y-m-d H:i:s');
-							else
-								$charDT = DateTime::createFromFormat($format, "00-00-0000 00-00");
 							//echo $charDT;
 							break;
 						}
 					}
-	//echo "ádd";
-			$dom = new DOMDocument('1.0');
-			@$dom->loadHTMLFile($p->url);	
-			$anchors = $dom->getElementsByTagName('p');
-					foreach ($anchors as $element) 
-					{		
-						if($element->getAttribute("class") == "Normal")
-						{				
-										
-							$Description = $Description  .$element->nodeValue;				
-							//echo $Description;
-						 }
-					}		
-					
-	$HSource = "SourceWeb\source"  ."$IName" .".html";
-	//echo $HSource;
-	$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" > $HSource";
-	 exec( $cmd , $output,$s);
-
-		$LinkLike = null;
+	$LinkLike = null;
 	 $dom = new DOMDocument('1.0');
 			@$dom->loadHTMLFile($HSource);	
 			$anchors = $dom->getElementsByTagName('iframe');
@@ -153,10 +152,13 @@ class MyCrawler extends PHPCrawler
 						{				
 										
 							$LinkLike = $element->getAttribute('src');				
-							//echo $LinkLike;	
+						//	echo $LinkLike;	
+							break;
 							//sleep(10);
 						}
-					}
+					}	
+					
+		
 	if($LinkLike != null)
 	{
 		$HSource = "source"  ."$IName" .".html";
@@ -164,25 +166,25 @@ class MyCrawler extends PHPCrawler
 	$cmd =__DIR__ ."\Driver\Debug\Crawler.exe \"$LinkLike\" $HSource";
 	$HSource = "SourceWeb\source"  ."$IName" .".html";
 		 exec( $cmd , $output,$s);
-
 		 $dom = new DOMDocument('1.0');
 			@$dom->loadHTMLFile($HSource);	
 			$anchors = $dom->getElementsByTagName('span');
 					foreach ($anchors as $element) 
 					{		
-					
 						if($element->getAttribute("class") == "pluginCountTextConnected")
 						{				
-							 $nLike = $element->nodeValue;
-						//	echo "\n ádasdasdasdasdsadassa";
-							//echo $nLike ."<br>";	
+										
+							 $nLike = $element->nodeValue;				
+						
 							//sleep(10);
 						}
-					}
-		if (strpos($nLike,'k') == true) {
+					}					
+	if (strpos($nLike,'k') == true) {
 			$nLike =  str_replace("k","",$nLike);
-			 $nLike =  $nLike * 1000;
+			$nLike =  str_replace(",",".",$nLike);
 		//	echo $nLike;
+			 $nLike =  $nLike * 1000.0;
+			//echo $nLike;
 		}
 	}	
 
@@ -190,36 +192,36 @@ class MyCrawler extends PHPCrawler
 			$Description = mysqli_real_escape_string($conn,$Description);
 			$Name = mysqli_real_escape_string($conn,$Name);
 			$TagTT = mysqli_real_escape_string($conn,$TagTT);
-				$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_like,linklike)
-					VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nLike','$LinkLike')";
-				echo "<br>";
-				//echo $sql;
-				$conn->query("set names 'utf8'");  
-				if ($conn->query($sql) === TRUE) 
-				{
-					echo "New record created successfully: url = " .$Link ."<br>";
-				}
-				else 
-				{
-					echo "error: url = " .$Link .$conn->error ."<br>";
-				//	echo "Error: " . $sql . "<br>" . $conn->error;
-				}
-			$result->close();
-		$conn->close();
-		
-
-		}
-		else
-		{
-			$id = null;
-			while ($myrow = $result->fetch_array(MYSQLI_ASSOC))
+			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_like,linklike)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nLike','$LinkLike')";
+			
+			//echo $sql;
+			$conn->query("set names 'utf8'");  
+			if ($conn->query($sql) === TRUE) 
 			{
-				$id =  $aValue[]=$myrow["id"];
-				$LinkLike = $aValue[]=$myrow["linklike"];
+				echo "New record created successfully: url = " .$Link ."<br>";
 			}
-			$result->close();
-			if($id != null)
-			{if($LinkLike != null)
+			else 
+			{
+				echo "error: url = " .$Link .$conn->error ."<br>";
+			//	echo "Error: " . $sql . "<br>" . $conn->error;
+			}
+		$result->close();
+		$conn->close();
+
+	}
+	else
+	{
+		$id = null;
+		while ($myrow = $result->fetch_array(MYSQLI_ASSOC))
+		{
+			$id =  $aValue[]=$myrow["id"];
+			$LinkLike = $aValue[]=$myrow["linklike"];
+		}
+		$result->close();
+		if($id != null)
+		{
+			if($LinkLike != null)
 				{
 					$HSource = "source"  ."$IName" .".html";
 					//$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
@@ -250,9 +252,8 @@ class MyCrawler extends PHPCrawler
 				}	
 
 				unlink($HSource);
-			}
-			
-			$sql = "UPDATE news SET num_like = '$nLike' , num_comment = '$nCommand' WHERE id='$id'";
+		}
+		$sql = "UPDATE news SET num_like = '$nLike'   WHERE id='$id'";
 
 			if ($conn->query($sql) === TRUE) 
 			{
@@ -265,11 +266,9 @@ class MyCrawler extends PHPCrawler
 
 			$conn->close();
 		
-  
-		}
-	//echo "ssadasdsa";
-	//flush ();
-}	
+	}
+	}	
+
 	function handleHeaderInfo(PHPCrawlerResponseHeader $header)
 	{
 
@@ -280,8 +279,8 @@ class MyCrawler extends PHPCrawler
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://ngoisao.net/tin-tuc/thu-gian/an-choi/dia-chi-cuoi-tuan-hai-khong-gian-de-tron-o-sapa-3346068.html");
-$crawler->setCrawlingDepthLimit(0);
+$crawler->setURL("http://blogtamsu.vn/");
+$crawler->setCrawlingDepthLimit(1);
 
 $crawler->enableCookieHandling(true);
 

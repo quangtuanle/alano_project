@@ -13,10 +13,11 @@ class MyCrawler extends PHPCrawler
 {
 	
 	function handleDocumentInfo(PHPCrawlerDocumentInfo $p)
-	{ $servername = "localhost";
+	{ 
+		$servername = "localhost";
 		$username = "root";
 		$password = "";
-		$dbname = "alano";
+		$dbname = "alano_website";
 		$Link = $p->url;
 		$theloai =  "tin tuc";
 		$NgayDang = "";
@@ -29,21 +30,52 @@ class MyCrawler extends PHPCrawler
 		$Name = "";
 		$TagTT ="";
 		$Description = "";
+// check connection database
+		$conn = new mysqli($servername, $username, $password, $dbname);
+
+		if ($conn->connect_error) 
+		{
+		die("Connection failed: " . $conn->connect_error);
+		return;
+		}
+//check link is exist in "Link not Crawler"		
+		$Link = mysqli_real_escape_string($conn,$Link);
+		$sql = "SELECT * FROM `linknotcrawler` WHERE `Link` = '$Link'";
+		$result = $conn->query($sql);
+// process is not exist		
+		if ($result->num_rows > 0) 
+		{
+			return;
+		}
+//load name		
 		$dom = new DOMDocument('1.0');
 		@$dom->loadHTMLFile($p->url);
-		$anchors = $dom->getElementsByTagName('p');
+		$anchors = $dom->getElementsByTagName('h1');
 				foreach ($anchors as $element) 
 				{	
-				if($element->getAttribute("class") == "fl-right dt"){
-						echo "asdsada";
+				if($element->getAttribute("class") == "art-title"){
+						//echo "asdsada";
 						//$element2 = $element->childNodes;
 						$Name = $element->nodeValue;
-						echo $Name;
+						//echo $Name;
 				}
 						
 				}
 		if($Name =="")
 			return;
+		$IName = 0;
+		$LName = strlen($Name);
+		for($i = 0; $i<$LName; $i++)
+		{	
+			$IName += ord($Name[$i]);
+		}
+		//check is exist
+		$Link = mysqli_real_escape_string($conn,$Link);
+		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
+		$result = $conn->query($sql);
+// process is not exist		
+		if ($result->num_rows == 0) 
+		{
 		//echo "<br>";
 		//echo "Tag của bài viết.<br>";
 			$dom = new DOMDocument('1.0');
@@ -84,8 +116,8 @@ class MyCrawler extends PHPCrawler
 						// echo $date.Tostring();
 						//if($date == null)
 						//	echo "null";
-						 $date =  $charDT->format('Y-m-d H:i:s');
-						 echo $date;
+						 $charDT =  $charDT->format('Y-m-d H:i:s');
+						// echo $date;
 					}
 				}
 		
@@ -105,96 +137,144 @@ class MyCrawler extends PHPCrawler
 						//echo "<br>";
 					
 					}
-				}		
-				echo $Description;
-$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" >source.html";
+				}	
+					$Description = trim($Description);
+				//echo $Description;
+$HSource = "SourceWeb\source"  ."$IName" .".html";
+//echo $HSource;
+$cmd ="cd " .__DIR__ ."|phantomjs conten.js \"$Link\" > $HSource";
  exec( $cmd , $output,$s);
+$LinkLike = null;
  $dom = new DOMDocument('1.0');
-		@$dom->loadHTMLFile("source.html");	
-		$anchors = $dom->getElementsByTagName('label');
-				foreach ($anchors as $element) 
-				{		
-					if($element->getAttribute("id") == "total_comment")
-					{				
-					
-						$nCommand = $element->nodeValue;				
-						echo $nCommand ."<br>";	
-						//sleep(10);
-					}
-				}
- $dom = new DOMDocument('1.0');
-		@$dom->loadHTMLFile("source.html");	
+		@$dom->loadHTMLFile( $HSource);	
 		$anchors = $dom->getElementsByTagName('iframe');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("title") == "fb:share_button Facebook Social Plugin")
+					if($element->getAttribute("title") == "fb:like Facebook Social Plugin")
 					{				
 									
 						$LinkLike = $element->getAttribute('src');				
-						echo $LinkLike;	
+						//echo $LinkLike;
+						break;						
 						//sleep(10);
 					}
 				}
-			
+	
+if($LinkLike != null)
+{
+$HSource = "source2"  ."$IName" .".html";
+//$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+$cmd =__DIR__ ."\Driver\Debug\Crawler.exe \"$LinkLike\" $HSource";
+$HSource = "SourceWeb\source2"  ."$IName" .".html";
 
-$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
 	 exec( $cmd , $output,$s);
+	// $HSource = "SourceWeb\source2"  ."$IName" .".html";
 	 $dom = new DOMDocument('1.0');
-		@$dom->loadHTMLFile("source.html");	
+		@$dom->loadHTMLFile($HSource);	
 		$anchors = $dom->getElementsByTagName('span');
 				foreach ($anchors as $element) 
 				{		
-					if($element->getAttribute("class") == "pluginCountTextConnected")
+					if($element->getAttribute("class") == "pluginCountTextDisconnected")
 					{				
 									
 						$nLike = $element->nodeValue;				
-						echo $nLike;	
+						//echo "<br>" .$nLike;	
 						//sleep(10);
 					}
 				}
-//$target = $p->url; // target URL
+if (strpos($nLike,'k') == true) {
+		$nLike =  str_replace("k","",$nLike);
+		$nLike =  str_replace(",",".",$nLike);
+		 $nLike =  $nLike * 1000;
+		//echo $nLike;
+	}
+}	
 
-		//return implode("", $output);				
-echo $Link;
-	if($Name !="")
-	{
-		$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-		if ($conn->connect_error) 
-		{
-		die("Connection failed: " . $conn->connect_error);
-		}
-		$sql = "SELECT * FROM `news` WHERE `link_source` = '$Link'";
-		$result = $conn->query($sql);
-		//echo "$Link";
-		//echo $result->num_rows;
-		if ($result->num_rows == 0) 
-		{
-    // output data of each row
-			//while($row = $result->fetch_assoc()) {
-			//echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
-			$Link = mysqli_real_escape_string($conn,$Link);
-			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_comment,num_like)
-				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nCommand','$nLike')";
+			unlink($HSource);
+			$Description = mysqli_real_escape_string($conn,$Description);
+			$Name = mysqli_real_escape_string($conn,$Name);
+			$TagTT = mysqli_real_escape_string($conn,$TagTT);
+			$sql = "INSERT INTO news (link_source,title,category,tag,content,published_at,num_comment,num_like,linklike)
+				VALUES ('$Link', '$Name', '$theloai','$TagTT','$Description','$charDT','$nCommand','$nLike','$LinkLike')";
 			echo "<br>";
 			//echo $sql;
 			$conn->query("set names 'utf8'");  
 			if ($conn->query($sql) === TRUE) 
 			{
-				echo "New record created successfully";
+				echo "New record created successfully: " .$Link ."<br>";
 			}
 			else 
 			{
-				echo "error:" .$conn->error;
+				echo "error: " .$Link ." " .$conn->error ."<br>";
 			//	echo "Error: " . $sql . "<br>" . $conn->error;
 			}
+			$conn->close();
+			
 		}
-		
-		$conn->close();
+		else
+		{
+			$id = null;
+			while ($myrow = $result->fetch_array(MYSQLI_ASSOC))
+			{
+				$id =  $aValue[]=$myrow["id"];
+				$LinkLike = $aValue[]=$myrow["linklike"];
+			}
+			$result->close();
+			if($id != null)
+			{
+				
+				
+				if($LinkLike != null)
+				{
+					$HSource = "source"  ."$IName" .".html";
+					//$cmd =__DIR__ ."\Debug\Crawler.exe \"$LinkLike\"" ;
+					$cmd =__DIR__ ."\Driver\Debug\Crawler.exe \"$LinkLike\" $HSource";
+					$HSource = "SourceWeb\source"  ."$IName" .".html";
+					exec( $cmd , $output,$s);
 
-	}
-	}	
+					$dom = new DOMDocument('1.0');
+					@$dom->loadHTMLFile($HSource);	
+					$anchors = $dom->getElementsByTagName('span');
+						foreach ($anchors as $element) 
+						{		
+						
+							if($element->getAttribute("class") == "pluginCountTextConnected")
+							{				
+								 $nLike = $element->nodeValue;
+								
+								//echo $nLike ."<br>";	
+								//sleep(10);
+							}
+						}
+					if (strpos($nLike,'k') == true) 
+					{
+					$nLike =  str_replace("k","",$nLike);
+					$nLike =  $nLike * 1000;
+					//echo $nLike;
+					}
+				}	
+
+				unlink($HSource);
+			}
+			
+			$sql = "UPDATE news SET num_like = '$nLike' , num_comment = '$nCommand' WHERE id='$id'";
+
+			if ($conn->query($sql) === TRUE) 
+			{
+				echo "Record updated successfully: id = " .$id ."<br>";
+			} 
+			else 
+			{
+			echo "Error updating record: id = " .$id ." " .$conn->error ."<br>";
+			}
+
+			$conn->close();
+		
+  
+		}
+	//echo "ssadasdsa";
+	//flush ();
+}	
 
 	function handleHeaderInfo(PHPCrawlerResponseHeader $header)
 	{
@@ -218,8 +298,8 @@ echo $Link;
 $crawler = new MyCrawler();
 
 // URL to crawl
-$crawler->setURL("http://www.doisongphapluat.com");
-$crawler->setCrawlingDepthLimit(1);
+$crawler->setURL("http://www.doisongphapluat.com/tin-tuc/tin-trong-nuoc/dai-hoi-cua-doan-ket-dan-chu-ky-cuong-doi-moi-a129965.html");
+$crawler->setCrawlingDepthLimit(0);
 // Only receive content of files with content-type "text/html"
 //$crawler->addContentTypeReceiveRule("#text/html#");
 

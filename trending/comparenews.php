@@ -39,32 +39,32 @@ function compare(array $News1, array $News2)
 	$tag = sameRatio($News1["tag"],$News2["tag"]);
 	
 	//So sánh nội dung chính, chỉ so sánh các danh từ riêng
-	$content1 = preg_split("/[ \n\t,.:']/", $News1["content"], -1, PREG_SPLIT_NO_EMPTY);
-	$content2 = preg_split("/[ \n\t,.:']/", $News2["content"], -1, PREG_SPLIT_NO_EMPTY);
+	// $content1 = preg_split("/[ \n\t,.:']/", $News1["content"], -1, PREG_SPLIT_NO_EMPTY);
+	// $content2 = preg_split("/[ \n\t,.:']/", $News2["content"], -1, PREG_SPLIT_NO_EMPTY);
 
-	$countupper = 0;
-	$sameword = 0;
-	for ($i = 1; $i < count($content1) - 1; $i++)
-	{
-		if (isUpper($content1[$i]) && (isUpper($content1[$i-1]) || isUpper($content1[$i+1])))
-		{
-			$countupper++;
+	// $countupper = 0;
+	// $sameword = 0;
+	// for ($i = 1; $i < count($content1) - 1; $i++)
+	// {
+		// if (isUpper($content1[$i]) && (isUpper($content1[$i-1]) || isUpper($content1[$i+1])))
+		// {
+			// $countupper++;
 			
-			for ($j = 0; $j < count($content2); $j++)
-				if ($content1[$i] == $content2[$j])
-				{
-					$sameword++;
-					break;
-				}
-		}
-	}
+			// for ($j = 0; $j < count($content2); $j++)
+				// if ($content1[$i] == $content2[$j])
+				// {
+					// $sameword++;
+					// break;
+				// }
+		// }
+	// }
 	
-	if ($countupper == 0)
-		$content = 0;
-	else
-		$content = $sameword/$countupper;
+	// if ($countupper == 0)
+		// $content = 0;
+	// else
+		// $content = $sameword/$countupper;
 	
-	$avg = 0.35*$title + 0.25*$content + 0.2*$summary + 0.2*$tag;
+	$avg = 0.4*$title + 0.3*$summary + 0.3*$tag;
 	
 	if ($avg >= 0.5)
 	{
