@@ -68,7 +68,6 @@ function compare(array $News1, array $News2)
 	
 	if ($avg >= 0.5)
 	{
-		
 		return true;
 	}
 }
@@ -99,11 +98,11 @@ else
 		$NewsInfo[] = $row_News;
 	
 	//So sánh 2 tin tức
-	for ($i = 0; $i < count($NewsInfo); $i++)
+	for ($i = count($NewsInfo) - 1; $i >= 0; $i--)
 	{
 		if ($NewsInfo[$i]["reviewed"] == 0)	//Chỉ so sánh những tin chưa duyệt
 		{
-			for ($j = $i + 1; $j < count($NewsInfo); $j++)
+			for ($j = $i - 1; $j >= 0; $j--)
 			{
 				//Nếu 2 tin được cho là có nội dung giống nhau
 				if (compare($NewsInfo[$i],$NewsInfo[$j]))
